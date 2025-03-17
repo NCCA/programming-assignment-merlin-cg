@@ -1,1 +1,9 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/hhQzWvz6)
+# Tom Bates CFGAA Assignment
+
+## Ideas
+
+I have not finalised an idea for the assignment, but here are some of my ideas:
+
+
+1. WebGPU terrain erosion
+2. OpenGL Physics engine
