@@ -40,11 +40,14 @@ void NGLScene::initializeGL()
   ngl::VAOPrimitives::createSphere("sphere",1.0f,20);
   ngl::VAOPrimitives::createLineGrid("floor",100,100,50);
   m_emitter=std::make_unique<Emitter>(10000,10000,800,ngl::Vec3(0,0,0));
-  m_plane = std::make_unique<Plane>(100, 100, 0.5f); // 100x100 grid, 1.0 spacing
-  //m_plane->applyPerlinNoise(0.1f, 10.0f); // scale, amplitude
-  ngl::ShaderLib::loadShader("ParticleShader","shaders/ParticleVertex.glsl","shaders/ParticleFragment.glsl");
 
-  ngl::ShaderLib::use("ParticleShader");
+  m_plane = std::make_unique<Plane>(100, 100, 0.5f); // 100x100 grid, 1.0  spacing
+
+  //m_plane->applyPerlinNoise(0.1f, 10.0f); // scale, amplitude
+  ngl::ShaderLib::loadShader("ColourShader","shaders/ColourVertex.glsl","shaders/ColourFragment.glsl");
+  ngl::ShaderLib::loadShader("PhongShader","shaders/PhongVertex.glsl","shaders/PhongFragment.glsl");
+
+  ngl::ShaderLib::use("ColourShader");
   m_view = ngl::lookAt({0,40,80},{0,0,0},{0,1,0});
   m_previousTime=std::chrono::steady_clock::now();
 
@@ -69,7 +72,7 @@ void NGLScene::paintGL()
   mouseRotation.m_m[3][1]=m_modelPos.m_y;
   mouseRotation.m_m[3][2]=m_modelPos.m_z;
 
-  ngl::ShaderLib::use("ParticleShader");
+  ngl::ShaderLib::use("ColourShader");
   ngl::ShaderLib::setUniform("MVP",m_project*m_view*mouseRotation);
  // m_emitter->render();
   m_plane->render();
@@ -143,13 +146,13 @@ void NGLScene::timerEvent(QTimerEvent *_event)
   if(m_animate)
   {
     process_keys();
-    m_emitter->update(delta.count());
+    // m_emitter->update(delta.count());
   }
-  update();
+ // update();
 }
 
 void NGLScene::setSpread(double _value)
 {
     m_emitter->setSpread(static_cast<float>(_value));
-        update();
+        //update();
 }

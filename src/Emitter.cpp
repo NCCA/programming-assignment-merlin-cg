@@ -39,53 +39,53 @@ size_t Emitter::size() const
   return m_maxParticles;
 }
 
-void Emitter::birthParticles()
-{
-  auto births = static_cast<int>(ngl::Random::randomPositiveNumber(m_numPerFrame));
+// void Emitter::birthParticles()
+// {
+//   auto births = static_cast<int>(ngl::Random::randomPositiveNumber(m_numPerFrame));
 
-  for(size_t i=0; i<births; ++i)
-  {
-    for(size_t p=0; p<m_maxParticles; ++p)
-    {
-      if(m_state[p] == ParticleState::Dead)
-      {
-        resetParticle(p);
-        m_state[p] = ParticleState::Active;
-        break;
-      }
-    }
- }
-}
+//   for(size_t i=0; i<births; ++i)
+//   {
+//     for(size_t p=0; p<m_maxParticles; ++p)
+//     {
+//       if(m_state[p] == ParticleState::Dead)
+//       {
+//         resetParticle(p);
+//         m_state[p] = ParticleState::Active;
+//         break;
+//       }
+//     }
+//  }
+// }
 
-void Emitter::update(float _dt)
-{
-  const ngl::Vec3 gravity(0.0f,-9.81f,0.0f);
+// void Emitter::update(float _dt)
+// {
+//   const ngl::Vec3 gravity(0.0f,-9.81f,0.0f);
 
-  auto numAlive = std::count_if(std::begin(m_state),std::end(m_state),
-                                [](auto p){ return p == ParticleState::Active;});
+//   auto numAlive = std::count_if(std::begin(m_state),std::end(m_state),
+//                                 [](auto p){ return p == ParticleState::Active;});
 
-  if(numAlive < m_maxAlive)
-  {
-    birthParticles();
-  }
-// #pragma omp parallel for
- for(size_t i=0; i<m_maxParticles; ++i)
- {
-    if(m_state[i] == ParticleState::Dead)
-      continue;
-    m_pdir[i] +=gravity * _dt * -0.1;
-    m_ppos[i] += m_pdir[i];
-    m_psize[i]+=0.1f;
-    m_psize[i] = std::clamp(m_psize[i],0.0f, 5.0f);
-    m_ppos[i].m_w=m_psize[i];
-    if(--m_plife[i] <=0 || m_ppos[i].m_y <=0.0f)
-    {
-      resetParticle(i);
-    }
-  }
+//   if(numAlive < m_maxAlive)
+//   {
+//     birthParticles();
+//   }
+// // #pragma omp parallel for
+//  for(size_t i=0; i<m_maxParticles; ++i)
+//  {
+//     if(m_state[i] == ParticleState::Dead)
+//       continue;
+//     m_pdir[i] +=gravity * _dt * -0.1;
+//     m_ppos[i] += m_pdir[i];
+//     m_psize[i]+=0.1f;
+//     m_psize[i] = std::clamp(m_psize[i],0.0f, 5.0f);
+//     m_ppos[i].m_w=m_psize[i];
+//     if(--m_plife[i] <=0 || m_ppos[i].m_y <=0.0f)
+//     {
+//       resetParticle(i);
+//     }
+//   }
 
 
-}
+// }
 
 
 

@@ -13,9 +13,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(m_gl,&NGLScene::glInitialized,[=](){
 
-    auto emitter=m_gl->getEmitter();
-        connect(m_ui->m_numPerFrame,SIGNAL(valueChanged(int)),
-            emitter,SLOT(setNumPerFrame(int)));
+    // auto emitter=m_gl->getEmitter();
+    //     connect(m_ui->m_numPerFrame,SIGNAL(valueChanged(int)),
+    //         emitter,SLOT(setNumPerFrame(int)));
     });
 }
 
