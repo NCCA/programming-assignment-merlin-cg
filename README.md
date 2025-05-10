@@ -16,6 +16,7 @@ Edit: I will be doing OpenGL Terrain Erosion
 # OpenGL terrain erosion (chosen idea)
 
 ## Base noise generation
+I hope to not spend too long on the noise generation as I already have scripted something like this in maya python.
 
 Applied vertical perlin noise (fractal) on my vertex array. Next step is to build a VAO from this.
 ![image](https://github.com/user-attachments/assets/c4078c79-37fa-4614-a425-e48d06364d7a)
