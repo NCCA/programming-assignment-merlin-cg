@@ -34,6 +34,8 @@ target_sources(${TargetName} PRIVATE
         ui/MainWindow.ui
         shaders/ParticleFragment.glsl
         shaders/ParticleVertex.glsl
+        shaders/ColourFragment.glsl
+        shaders/ColourVertex.glsl
 )
 
 target_include_directories(ParticleQt PRIVATE include)
