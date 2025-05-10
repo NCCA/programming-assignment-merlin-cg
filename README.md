@@ -1,5 +1,5 @@
 # Tom Bates CFGAA Assignment
-
+TODO: removing the Emitter.h class without breaking the program
 ## Ideas
 
 I have not finalised an idea for the assignment, but here are some of my ideas:
@@ -8,6 +8,7 @@ I have not finalised an idea for the assignment, but here are some of my ideas:
 1. WebGPU terrain erosion
 2. OpenGL Physics engine
 
+Edit: I will be doing OpenGL Terrain Erosion
 
 # OpenGL terrain erosion (chosen idea)
 
