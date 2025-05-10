@@ -45,9 +45,9 @@ void NGLScene::initializeGL()
 
   //m_plane->applyPerlinNoise(0.1f, 10.0f); // scale, amplitude
   ngl::ShaderLib::loadShader("ColourShader","shaders/ColourVertex.glsl","shaders/ColourFragment.glsl");
-  ngl::ShaderLib::loadShader("PhongShader","shaders/PhongVertex.glsl","shaders/PhongFragment.glsl");
+  ngl::ShaderLib::loadShader("HeightColourShader","shaders/HeightColourVertex.glsl","shaders/HeightColourFragment.glsl");
 
-  ngl::ShaderLib::use("ColourShader");
+  ngl::ShaderLib::use("HeightColourShader");
   m_view = ngl::lookAt({0,40,80},{0,0,0},{0,1,0});
   m_previousTime=std::chrono::steady_clock::now();
 
@@ -72,7 +72,7 @@ void NGLScene::paintGL()
   mouseRotation.m_m[3][1]=m_modelPos.m_y;
   mouseRotation.m_m[3][2]=m_modelPos.m_z;
 
-  ngl::ShaderLib::use("ColourShader");
+  ngl::ShaderLib::use("HeightColourShader");
   ngl::ShaderLib::setUniform("MVP",m_project*m_view*mouseRotation);
  // m_emitter->render();
   m_plane->render();

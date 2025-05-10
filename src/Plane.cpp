@@ -51,7 +51,7 @@ void Plane::generate()
             if (m_depth == 1) noiseInputZ = 0.0f;
 
             float noiseFrequency = 5.0f;
-            int noiseOctaves = 4;
+            int noiseOctaves = 8;
 
             float height_normalized = perlin.octave2D_01(noiseInputX * noiseFrequency,
                                                          noiseInputZ * noiseFrequency,
