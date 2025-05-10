@@ -17,7 +17,7 @@ Edit: I will be doing OpenGL Terrain Erosion
 
 ## Base noise generation
 
-Applied vertical perlin noise (fractal) on my vertex array. Next step is to build a VAO from this.
+Applied vertical perlin noise (fractal) on my vertex array using the PerlinNoise header library. Next step is to build a VAO from this.
 ![image](https://github.com/user-attachments/assets/c4078c79-37fa-4614-a425-e48d06364d7a)
 
 Implemented triangle mesh rendering by looping over the grid of vertices to process each quad, then splits quads into triangles.
