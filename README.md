@@ -9,7 +9,9 @@ I have not finalised an idea for the assignment, but here are some of my ideas:
 2. OpenGL Physics engine
 
 
-## OpenGL terrain erosion
+## OpenGL terrain erosion (chosen idea)
+
+# Base noise generation
 
 Applied vertical perlin noise (fractal) on my vertex array. Next step is to build a VAO from this.
 ![image](https://github.com/user-attachments/assets/c4078c79-37fa-4614-a425-e48d06364d7a)
