@@ -26,4 +26,4 @@ Implemented triangle mesh rendering by looping over the grid of vertices to proc
 
 Added height shader that takes normalised vertex y coordinate as colour input.
 
-![image](https://github.com/user-attachments/assets/d2729ec7-4e4b-4f34-8010-a8d1522a3b79)
+![image](https://github.com/user-attachments/assets/a18b0b55-aa3d-4e60-bcf3-327040691784)
