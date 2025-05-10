@@ -1,7 +1,7 @@
 # Tom Bates CFGAA Assignment
 TODO: 
 removing the Emitter.h class without breaking the program
-Updating the Qt UI to edit Plane class.
+Updating the Qt UI to customise Plane class.
 
 ## Ideas
 
