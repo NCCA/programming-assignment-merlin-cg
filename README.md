@@ -1,5 +1,8 @@
 # Tom Bates CFGAA Assignment
-TODO: removing the Emitter.h class without breaking the program
+TODO: 
+removing the Emitter.h class without breaking the program
+Updating the Qt UI to edit Plane class.
+
 ## Ideas
 
 I have not finalised an idea for the assignment, but here are some of my ideas:
@@ -20,3 +23,5 @@ Applied vertical perlin noise (fractal) on my vertex array. Next step is to buil
 Implemented triangle mesh rendering by looping over the grid of vertices to process each quad, then splits quads into triangles.
 
 ![image](https://github.com/user-attachments/assets/2b8ff2f1-6c0c-489e-90a9-5c6d2fc40d3d)
+
+Added height shader that takes normalised vertex y coordinate as colour input.
