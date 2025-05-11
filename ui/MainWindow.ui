@@ -15,6 +15,13 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="m_MainWindowgridLayout">
+    <item row="1" column="1">
+     <widget class="QGroupBox" name="groupBox_2">
+      <property name="title">
+       <string>Erosion Controls</string>
+      </property>
+     </widget>
+    </item>
     <item row="1" column="0">
      <spacer name="horizontalSpacer">
       <property name="orientation">
@@ -31,13 +38,13 @@
     <item row="0" column="1">
      <widget class="QGroupBox" name="groupBox">
       <property name="title">
-       <string>Particle Controls</string>
+       <string>Noise Controls</string>
       </property>
       <widget class="QDoubleSpinBox" name="freqSpinBox">
        <property name="geometry">
         <rect>
-         <x>40</x>
-         <y>30</y>
+         <x>10</x>
+         <y>70</y>
          <width>66</width>
          <height>27</height>
         </rect>
@@ -52,27 +59,56 @@
       <widget class="QSpinBox" name="octavesSpinBox">
        <property name="geometry">
         <rect>
-         <x>50</x>
-         <y>80</y>
+         <x>10</x>
+         <y>130</y>
          <width>45</width>
          <height>27</height>
         </rect>
        </property>
        <property name="minimum">
-        <number>2</number>
+        <number>1</number>
+       </property>
+       <property name="value">
+        <number>4</number>
        </property>
       </widget>
       <widget class="QDoubleSpinBox" name="doubleSpinBox">
        <property name="geometry">
         <rect>
-         <x>40</x>
-         <y>230</y>
+         <x>20</x>
+         <y>350</y>
          <width>66</width>
          <height>27</height>
         </rect>
        </property>
        <property name="value">
         <double>4.000000000000000</double>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>50</y>
+         <width>81</width>
+         <height>19</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Frequency</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_2">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>110</y>
+         <width>63</width>
+         <height>19</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Octaves</string>
        </property>
       </widget>
      </widget>
