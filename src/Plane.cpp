@@ -12,6 +12,7 @@
 #include <ngl/Util.h>
 #include <ngl/VAOFactory.h>
 #include "PerlinNoise.hpp"
+static bool s_isFirstGeneration = true;
 
 Plane::Plane(unsigned int _width, unsigned int _depth, float _spacing)
     : m_width(_width), m_depth(_depth), m_spacing(_spacing)
@@ -22,6 +23,11 @@ Plane::Plane(unsigned int _width, unsigned int _depth, float _spacing)
 
 void Plane::generate()
 {
+
+    std::cout << "Plane::generate() called. Using Frequency: " << m_noiseFrequency
+              << ", Octaves: " << m_noiseOctaves << std::endl;
+
+
     const siv::PerlinNoise::seed_type seed = 123456u; // Seed
     const siv::PerlinNoise perlin{seed};
     m_vertices.clear();
@@ -50,12 +56,11 @@ void Plane::generate()
             if (m_width == 1) noiseInputX = 0.0f;
             if (m_depth == 1) noiseInputZ = 0.0f;
 
-            float noiseFrequency = 5.0f;
-            int noiseOctaves = 8;
 
-            float height_normalized = perlin.octave2D_01(noiseInputX * noiseFrequency,
-                                                         noiseInputZ * noiseFrequency,
-                                                         noiseOctaves);
+
+            float height_normalized = perlin.octave2D_01(noiseInputX * m_noiseFrequency,
+                                                         noiseInputZ * m_noiseFrequency,
+                                                         m_noiseOctaves);
 
             float terrainMaxHeight = 8.0f; // Adjust as needed
             float y_pos = height_normalized * terrainMaxHeight;
@@ -65,11 +70,9 @@ void Plane::generate()
     }
 
 
-    // Create a new vector that will hold vertices arranged for triangle drawing.
-    std::vector<ngl::Vec3> render_vertices;
     // Reserve space: each quad becomes 2 triangles, each triangle has 3 vertices.
     if (m_width > 1 && m_depth > 1) {
-        render_vertices.reserve((m_width - 1) * (m_depth - 1) * 6);
+        m_vertices.reserve((m_width - 1) * (m_depth - 1) * 6);
     }
 
 
@@ -84,46 +87,64 @@ void Plane::generate()
 
 
             // Triangle 1: topLeft, bottomLeft, topRight
-            render_vertices.push_back(unique_vertices[topLeft]);
-            render_vertices.push_back(unique_vertices[bottomLeft]);
-            render_vertices.push_back(unique_vertices[topRight]);
+            m_vertices.push_back(unique_vertices[topLeft]);
+            m_vertices.push_back(unique_vertices[bottomLeft]);
+            m_vertices.push_back(unique_vertices[topRight]);
 
             // Triangle 2: topRight, bottomLeft, bottomRight
-            render_vertices.push_back(unique_vertices[topRight]);
-            render_vertices.push_back(unique_vertices[bottomLeft]);
-            render_vertices.push_back(unique_vertices[bottomRight]);
+            m_vertices.push_back(unique_vertices[topRight]);
+            m_vertices.push_back(unique_vertices[bottomLeft]);
+            m_vertices.push_back(unique_vertices[bottomRight]);
         }
     }
 
-    // Check if render_vertices is empty before proceeding
-    if (render_vertices.empty()) {
-        std::cerr << "Error: render_vertices is empty. No plane will be generated. Check with and depth" << std::endl;
+    if (m_vertices.empty()) {
+        std::cerr << "Error: m_vertices is empty. No plane will be generated. Check with and depth" << std::endl;
         // Ensure m_vao is at least minimally valid if it's a member and accessed elsewhere
-        if (!m_vao) { // Create it if it doesn't exist yet
-            m_vao = ngl::vaoFactoryCast<ngl::SimpleVAO>(
-                ngl::VAOFactory::createVAO(ngl::simpleVAO, GL_TRIANGLES));
-        }
+
+
+
+        if (m_vertices.empty()) { /* ... handle empty ... */ return; }
+
+        m_vao.reset(); // <<< THIS LINE HERE
+        m_vao = ngl::vaoFactoryCast<ngl::MultiBufferVAO>(
+            ngl::VAOFactory::createVAO(ngl::multiBufferVAO,GL_TRIANGLES));
+
         m_vao->bind();
         m_vao->setNumIndices(0); // Set to 0 indices if no data
         m_vao->unbind();
         return;
     }
 
-    // Set up VAO
-    m_vao = ngl::vaoFactoryCast<ngl::SimpleVAO>(
-        ngl::VAOFactory::createVAO(ngl::simpleVAO, GL_TRIANGLES)); // For now
+    // If VAO doesnt exist, create it. Otherwise, we assume we are re-populating it.
+    m_vao = ngl::vaoFactoryCast<ngl::MultiBufferVAO>(
+        ngl::VAOFactory::createVAO(ngl::multiBufferVAO, GL_TRIANGLES)); // For now
     m_vao->bind();
 
     // Set the data using the render_vertices vector
-    m_vao->setData(ngl::SimpleVAO::VertexData(render_vertices.size() * sizeof(ngl::Vec3), render_vertices[0].m_x));
+    m_vao->setData(ngl::MultiBufferVAO::VertexData(m_vertices.size() * sizeof(ngl::Vec3), m_vertices[0].m_x));
     // Set the vertex attribute pointer for positions (attribute 0)
     m_vao->setVertexAttributePointer(0, 3, GL_FLOAT, 0, 0);
-    m_vao->setNumIndices(render_vertices.size());
+    m_vao->setNumIndices(m_vertices.size());
+
+
+    std::cout << "Plane::generate() - unique_vertices size: " << unique_vertices.size() << std::endl;
+    std::cout << "Plane::generate() - m_vertices (render_vertices) size: " << m_vertices.size() << std::endl;
+    if (!m_vertices.empty()) {
+        std::cout << "First vertex in m_vertices: (" << m_vertices[0].m_x << ", "
+                  << m_vertices[90].m_y << ", " << m_vertices[90].m_z << ")" << std::endl;
+    }
+
 
     m_vao->unbind();
 }
 
+void Plane::regenerate()
+{
+    std::cout << "Plane::regenerate() called. Frequency: " << m_noiseFrequency << ", Octaves: " << m_noiseOctaves << std::endl;
+    generate(); // Re-run the generation logic
 
+}
 
 void Plane::render() const
 {

@@ -6,8 +6,6 @@ layout (location=0) out vec4 fragColour;
 
 void main()
 {
-    // Define min and max expected heights for your terrain
-    // You mentioned your terrainMaxHeight was 8.0f in Plane.cpp
     float minTerrainHeight = 0.0;
     float maxTerrainHeight = 8.0; 
 

@@ -41,7 +41,7 @@ void NGLScene::initializeGL()
   ngl::VAOPrimitives::createLineGrid("floor",100,100,50);
   m_emitter=std::make_unique<Emitter>(10000,10000,800,ngl::Vec3(0,0,0));
 
-  m_plane = std::make_unique<Plane>(100, 100, 0.5f); // 100x100 grid, 1.0  spacing
+  m_plane = std::make_unique<Plane>(500, 500, 0.1f);
 
   //m_plane->applyPerlinNoise(0.1f, 10.0f); // scale, amplitude
   ngl::ShaderLib::loadShader("ColourShader","shaders/ColourVertex.glsl","shaders/ColourFragment.glsl");
@@ -118,7 +118,7 @@ void NGLScene::keyPressEvent(QKeyEvent *_event)
 
 void NGLScene::process_keys()
 {
-  std::cout<<"Set Size " << m_keysPressed.size()<<"\n";
+  //std::cout<<"Set Size " << m_keysPressed.size()<<"\n";
   float dx=0.0f;
   float dy=0.0f;
   float dz=0.0f;
@@ -142,7 +142,7 @@ void NGLScene::timerEvent(QTimerEvent *_event)
   auto now = std::chrono::steady_clock::now();
   auto delta = std::chrono::duration<float,std::chrono::seconds::period>(now-m_previousTime);
   m_previousTime=now;
-  std::cout<<"time delta" << delta.count()<<'\n';
+  //std::cout<<"time delta" << delta.count()<<'\n';
   if(m_animate)
   {
     process_keys();
@@ -155,4 +155,22 @@ void NGLScene::setSpread(double _value)
 {
     m_emitter->setSpread(static_cast<float>(_value));
         //update();
+}
+
+void NGLScene::updateTerrainFrequency(float freq)
+{
+    if (m_plane) {
+        m_plane->setFrequency(freq);
+        m_plane->regenerate();
+        update(); // Tell the NGL widget to repaint itself
+    }
+}
+
+void NGLScene::updateTerrainOctaves(int octaves)
+{
+    if (m_plane) {
+        m_plane->setOctaves(octaves);
+        m_plane->regenerate();
+        update(); // Tell the NGL widget to repaint itself
+    }
 }

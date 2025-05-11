@@ -51,7 +51,8 @@ class NGLScene : public QOpenGLWidget
     //----------------------------------------------------------------------------------------------------------------------
     void resizeGL(int _w, int _h) override;
     Emitter *getEmitter() { return m_emitter.get();}
-
+    void updateTerrainFrequency(float freq);
+    void updateTerrainOctaves(int octaves);
 
 public slots :
 
