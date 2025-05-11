@@ -17,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 
 
-
+ //MainWindow.cpp UI handling
         connect(m_ui->freqSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
                 this, [this](double value) {
                     if (m_gl) { // Check if m_gl is valid

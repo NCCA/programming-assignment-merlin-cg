@@ -1,6 +1,5 @@
 #include <QMouseEvent>
 #include <QGuiApplication>
-
 #include "NGLScene.h"
 #include <ngl/NGLInit.h>
 #include <ngl/VAOPrimitives.h>
@@ -87,6 +86,8 @@ void NGLScene::paintGL()
 
 }
 
+//rest of NGLScene such as keypress events, process keys, timerEvent, updateTerrainFrequency, updateTerrainOctaves
+
 //----------------------------------------------------------------------------------------------------------------------
 
 void NGLScene::keyReleaseEvent(QKeyEvent *_event)
@@ -160,8 +161,11 @@ void NGLScene::setSpread(double _value)
 void NGLScene::updateTerrainFrequency(float freq)
 {
     if (m_plane) {
-        m_plane->setFrequency(freq);
+        m_plane->setNoiseFrequency(freq);
+        makeCurrent();
         m_plane->regenerate();
+        doneCurrent();
+
         update(); // Tell the NGL widget to repaint itself
     }
 }
@@ -169,8 +173,11 @@ void NGLScene::updateTerrainFrequency(float freq)
 void NGLScene::updateTerrainOctaves(int octaves)
 {
     if (m_plane) {
-        m_plane->setOctaves(octaves);
+        m_plane->setNoiseOctaves(octaves);
+        makeCurrent();
         m_plane->regenerate();
+        doneCurrent();
+
         update(); // Tell the NGL widget to repaint itself
     }
 }

@@ -1,5 +1,5 @@
 #version 330 core
-
+//HeightColourFragment
 in float outHeight; // Height received from vertex shader (original y-coordinate)
 
 layout (location=0) out vec4 fragColour;

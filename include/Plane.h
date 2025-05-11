@@ -15,12 +15,17 @@ public:
     void regenerate();
     void render() const;
     void applyPerlinNoise(float scale, float amplitude);
-    void setFrequency(float freq) { m_noiseFrequency = freq; }
-    float getFrequency() const { return m_noiseFrequency; }
-    void setOctaves(int oct) { m_noiseOctaves = oct; }
-    int getOctaves() const { return m_noiseOctaves; }
-
+    void setNoiseFrequency(float freq) { m_noiseFrequency = freq; }
+    float getNoiseFrequency() const { return m_noiseFrequency; }
+    void setNoiseOctaves(int oct) { m_noiseOctaves = oct; }
+    int getNoiseOctaves() const { return m_noiseOctaves; }
 private:
+    // Helper methods for refactored generation
+    void clearTerrainData();
+    std::vector<ngl::Vec3> createBaseGridVertices();
+    void applyPerlinNoiseToGrid(std::vector<ngl::Vec3>& gridVertices); // Takes gridVertices by non-const reference to modify them
+    void buildTriangleMeshFromGrid(const std::vector<ngl::Vec3>& noisyGridVertices); // Takes noisyGridVertices by const reference
+    void setupTerrainVAO();
 
     unsigned int m_width;
     unsigned int m_depth;

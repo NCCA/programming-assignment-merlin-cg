@@ -23,7 +23,9 @@ Plane::Plane(unsigned int _width, unsigned int _depth, float _spacing)
 
 void Plane::generate()
 {
-
+    if (m_vao) {
+        m_vao.reset();
+    }
     std::cout << "Plane::generate() called. Using Frequency: " << m_noiseFrequency
               << ", Octaves: " << m_noiseOctaves << std::endl;
 
@@ -98,23 +100,21 @@ void Plane::generate()
         }
     }
 
+    if (m_vao) {
+        m_vao.reset();
+    }
+
     if (m_vertices.empty()) {
-        std::cerr << "Error: m_vertices is empty. No plane will be generated. Check with and depth" << std::endl;
-        // Ensure m_vao is at least minimally valid if it's a member and accessed elsewhere
-
-
-
-        if (m_vertices.empty()) { /* ... handle empty ... */ return; }
-
-        m_vao.reset(); // <<< THIS LINE HERE
+        std::cerr << "Error: m_vertices is empty after generation. No plane will be rendered." << std::endl;
+        // Create a new, empty VAO to avoid issues with an uninitialized or stale m_vao
         m_vao = ngl::vaoFactoryCast<ngl::MultiBufferVAO>(
-            ngl::VAOFactory::createVAO(ngl::multiBufferVAO,GL_TRIANGLES));
-
+            ngl::VAOFactory::createVAO(ngl::multiBufferVAO, GL_TRIANGLES));
         m_vao->bind();
         m_vao->setNumIndices(0); // Set to 0 indices if no data
         m_vao->unbind();
-        return;
+        return; // Exit if no vertices
     }
+
 
     // If VAO doesnt exist, create it. Otherwise, we assume we are re-populating it.
     m_vao = ngl::vaoFactoryCast<ngl::MultiBufferVAO>(
@@ -138,6 +138,15 @@ void Plane::generate()
 
     m_vao->unbind();
 }
+
+void Plane::clearTerrainData()
+{
+
+}
+
+
+
+
 
 void Plane::regenerate()
 {

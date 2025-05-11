@@ -1,4 +1,5 @@
 #version 330 core
+//HeightColourVertex.glsl
 uniform mat4 MVP;
 
 layout (location=0) in vec3 inVert;
