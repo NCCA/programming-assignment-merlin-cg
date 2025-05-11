@@ -1,6 +1,4 @@
 # Tom Bates CFGAA Assignment
-TODO: 
-removing the Emitter.h class
 
 ## Ideas
 
