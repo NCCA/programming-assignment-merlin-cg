@@ -26,11 +26,14 @@ public:
     void setNoiseOctaves(int oct) { m_noiseOctaves = oct; }
     int getNoiseOctaves() const { return m_noiseOctaves; }
 
+    //Erosion
+    void applyHydraulicErosion();
+
 private:
     // Helper methods for refactored generation
     void clearTerrainData();
-    std::vector<ngl::Vec3> createBaseGridVertices();
-    void applyPerlinNoiseToGrid(std::vector<ngl::Vec3>& gridVertices);
+    void createBaseGridVertices();
+    void applyPerlinNoiseToGrid();
     void buildTriangleMeshFromGrid(const std::vector<ngl::Vec3>& noisyGridVertices);
     void setupTerrainVAO();
 
@@ -39,10 +42,24 @@ private:
     std::vector<ngl::Vec3> m_verticesRaw; // grid vertices
     std::vector<ngl::Vec3> m_vertices;    // triangle vertices (duplicated)
     std::vector<GLuint> m_indices;
+    std::vector<ngl::Vec3> m_heightGrid;
     float m_spacing;
     std::unique_ptr<ngl::MultiBufferVAO> m_vao;
     float m_noiseFrequency = 5.0f;
     int m_noiseOctaves = 4;
+
+    //Erosion
+    int m_erosionIterations;
+    int m_numErosionParticlesPerIteration;
+    int m_erosionParticleMaxLifetime;
+    float m_sedimentCapacityFactor;
+    float m_erosionRate;
+    float m_depositionRate;
+    float m_inertia;
+    float m_gravity;
+    float m_initialWater;
+    float m_initialSpeed;
+
 };
 
 #endif // PLANE_H

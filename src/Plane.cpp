@@ -24,14 +24,13 @@ void Plane::clearTerrainData()
 {
     std::cout << "Plane::clearTerrainData() called." << std::endl;
     m_vertices.clear();
-
+    m_heightGrid.clear();
 }
 
-std::vector<ngl::Vec3> Plane::createBaseGridVertices()
+void Plane::createBaseGridVertices()
 {
     std::cout << "Plane::createBaseGridVertices() called." << std::endl;
-    std::vector<ngl::Vec3> baseVertices;
-    baseVertices.reserve(m_width * m_depth); // Reserve space for all unique vertices
+    m_heightGrid.reserve(m_width * m_depth); // Reserve space for all unique vertices
 
     for (unsigned int z = 0; z < m_depth; ++z)
     {
@@ -40,47 +39,53 @@ std::vector<ngl::Vec3> Plane::createBaseGridVertices()
             float current_x_pos = x * m_spacing;
             float current_z_pos = z * m_spacing;
             // Y is 0.0f for the base grid; noise will be applied later.
-            baseVertices.emplace_back(current_x_pos, 0.0f, current_z_pos);
+            m_heightGrid.emplace_back(current_x_pos, 0.0f, current_z_pos);
         }
     }
-    std::cout << "Plane::createBaseGridVertices() - generated " << baseVertices.size() << " base vertices." << std::endl;
-    return baseVertices;
+    std::cout << "Plane::createBaseGridVertices() - generated " << m_heightGrid.size() << " base vertices." << std::endl;
 }
 
-void Plane::applyPerlinNoiseToGrid(std::vector<ngl::Vec3>& gridVertices) // Takes vector by reference
+void Plane::applyPerlinNoiseToGrid()
 {
-    const siv::PerlinNoise::seed_type seed = 123456u; // Seed
+    std::cout << "Plane::applyPerlinNoiseToGrid() called for member m_heightGrid." << std::endl;
+    if (this->m_heightGrid.empty())
+    {
+        std::cerr << "Error: m_heightGrid is empty in applyPerlinNoiseToGrid(). Cannot apply noise." << std::endl;
+        return;
+    }
+
+    const siv::PerlinNoise::seed_type seed = 123456u;
     const siv::PerlinNoise perlin{seed};
-    //Vector to store unique vertices on grid
-    std::vector<ngl::Vec3> unique_vertices;
-    unique_vertices.reserve(m_width * m_depth);
-
-    float terrainMaxHeight = 8.0f; // TODO UI & make class member
-
-    float planeTotalWidth = (m_width -1) * m_spacing;
-    float planeTotalDepth = (m_depth -1) * m_spacing;
-
-    if (planeTotalWidth == 0.0f) planeTotalWidth = 1.0f; // Avoid division by zero
+    float terrainMaxHeight = 8.0f;
+    float planeTotalWidth = (m_width > 1) ? (m_width - 1) * m_spacing : 1.0f;
+    float planeTotalDepth = (m_depth > 1) ? (m_depth - 1) * m_spacing : 1.0f;
+    if (planeTotalWidth == 0.0f) planeTotalWidth = 1.0f;
     if (planeTotalDepth == 0.0f) planeTotalDepth = 1.0f;
 
-    for (ngl::Vec3& vertex : gridVertices) // Iterate by reference to modify Y values
+    for (ngl::Vec3& vertex : this->m_heightGrid) // Iterate by reference to modify Y values
     {
         float current_x_pos = vertex.m_x;
         float current_z_pos = vertex.m_z;
-
-        // Normalise and handle whether if m_width/depth = 1.0
         float noiseInputX = (m_width == 1) ? 0.0f : current_x_pos / planeTotalWidth;
         float noiseInputZ = (m_depth == 1) ? 0.0f : current_z_pos / planeTotalDepth;
-
         float height_normalized = perlin.octave2D_01(noiseInputX * m_noiseFrequency,
                                                      noiseInputZ * m_noiseFrequency,
                                                      m_noiseOctaves);
-
-        // Apply the noise to the Y-coordinate, scaled by terrainMaxHeight
         vertex.m_y = height_normalized * terrainMaxHeight;
     }
+    std::cout << "Plane::applyPerlinNoiseToGrid() - applied noise to " << this->m_heightGrid.size() << " vertices in member m_heightGrid." << std::endl;
+}
 
-    std::cout << "Plane::applyPerlinNoiseToGrid() - applied noise to " << gridVertices.size() << " vertices." << std::endl;
+void Plane::applyHydraulicErosion() {
+    if (m_heightGrid.empty()) {
+        std::cerr << "Error: Height grid is empty. Cannot apply erosion." << std::endl;
+        return;
+    }
+
+
+//TODO:  Let It Rain
+
+
 }
 
 void Plane::buildTriangleMeshFromGrid(const std::vector<ngl::Vec3>& noisyGridVertices)
@@ -173,11 +178,11 @@ void Plane::generate()
 
     clearTerrainData();
 
-    std::vector<ngl::Vec3> baseGrid = createBaseGridVertices();
+    createBaseGridVertices();
 
-    applyPerlinNoiseToGrid(baseGrid);
+    applyPerlinNoiseToGrid();
 
-    buildTriangleMeshFromGrid(baseGrid);
+    buildTriangleMeshFromGrid(m_heightGrid);
 
     setupTerrainVAO();
 
