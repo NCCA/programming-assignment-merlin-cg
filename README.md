@@ -30,4 +30,4 @@ Added height shader that takes normalised vertex y coordinate as colour input.
 
 Added some UI controls for the grid and noise generation.
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/9tNtFw8fZuY?si=VlPM3QL2DGx5ZNWR" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+[![](https://markdown-videos-api.jorgenkh.no/youtube/{9tNtFw8fZuY})](https://youtu.be/{9tNtFw8fZuY})
