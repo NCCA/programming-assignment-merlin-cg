@@ -10,9 +10,11 @@ I have not finalised an idea for the assignment, but here are some of my ideas:
 
 Edit: I will be doing OpenGL Terrain Erosion
 
-# OpenGL terrain erosion (chosen idea)
+# Qt OpenGL terrain erosion (chosen idea)
 
 ## Base noise generation
+TODO: Add m_maxHeight and implement in UI.
+
 
 ![image](https://github.com/user-attachments/assets/c4078c79-37fa-4614-a425-e48d06364d7a)
 Applied vertical perlin noise (fractal) on my vertex array using the [PerlinNoise](https://github.com/Reputeless/PerlinNoise) header library. Next step is to build a VAO from this.
