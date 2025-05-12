@@ -76,16 +76,79 @@ void Plane::applyPerlinNoiseToGrid()
     std::cout << "Plane::applyPerlinNoiseToGrid() - applied noise to " << this->m_heightGrid.size() << " vertices in member m_heightGrid." << std::endl;
 }
 
-void Plane::applyHydraulicErosion() {
+//TODO: GetInterpolatedHeight function
+//TODO: CalculateGradient function
+
+//Sebastian Lague's Erosion outline:
+    // Erode(map)
+    // {
+    //     // Create water droplet at random point on the map
+    //     for(lifetime 1; lifetime 30; liftime ++)
+    //         // Calculate droplets height and the direction of flow with bilinear interpolation of surrounding heights
+
+    //         // Update the droplets position (move 1 unit regardless of speed so as not to skip over sections of the map)
+
+    //         // Find the droplet's new height and calculate the deltaHeight
+
+    //         // Calculate the droplet's sediment capacity based on its speed and how much water is in the droplet (higher when moving fast down a slope and contains lots of water)
+
+    //         // If calculating more sediment than capacity, or if flowing up a slope (due to its inertia)
+    //         // Deposit a fraction of the sediment to the surrounding nodes (with bilinear interpolation)
+
+    //         // Otherwise erode a fraction of the droplets remaining capacity from the soil, distributed over the radius of the droplet.
+    //         // Note: don't erode more than deltaHeight to avoid digging holes behind the droplet and creating sikes
+
+    //         // Update droplet's speed based on deltaHeight
+    //         // Evaporate a fraction of the droplet's water
+
+
+
+//Keeping this embedded here temporarily.
+struct ErosionDroplet {
+    float posX, posZ;       // Current position
+    float dirX, dirZ;       // Direction vector
+    float speed;            // Current speed
+    float water;            // Amount of water carried
+    float sediment;         // Amount of sediment carried
+    int lifetime;           // Steps remaining
+
+    // Constructor for convenience
+    ErosionDroplet(float x, float z, float initialSpeed, float initialWater, int maxLifetime)
+        : posX(x), posZ(z), dirX(0.0f), dirZ(0.0f), speed(initialSpeed),
+        water(initialWater), sediment(0.0f), lifetime(maxLifetime) {}
+};
+
+void Plane::applyHydraulicErosion() { //TODO:  Let It Rain
     if (m_heightGrid.empty()) {
         std::cerr << "Error: Height grid is empty. Cannot apply erosion." << std::endl;
         return;
     }
+    std::cout << "Applying hydraulic erosion..." << std::endl;
+    std::cout << "Parameters: Iterations = " << m_erosionIterations
+              << ", Particles/Iteration = " << m_numErosionDropletsPerIteration
+              << ", Max Lifetime = " << m_numErosionDropletsPerIteration
+              << std::endl;
+    std::cout << "Sediment Capacity Factor: " << m_sedimentCapacityFactor
+              << ", Erosion Rate: " << m_erosionRate
+              << ", Deposition Rate: " << m_depositionRate << std::endl;
+
+    //ngl::Random::randomPositiveNumber()
+
+    std::cout << "Hydraulic erosion simulation started." << std::endl;
 
 
-//TODO:  Let It Rain
+/////////////////////
 
 
+    std::cout << "Hydraulic erosion simulation finished." << std::endl;
+
+    // After erosion, the m_heightGrid has changed.
+    // We need to rebuild the renderable vertex buffer (m_vertices) and update the VAO.
+    std::cout << "Rebuilding triangle mesh and VAO from eroded height grid..." << std::endl;
+    buildTriangleMeshFromGrid(m_heightGrid); // Rebuild m_vertices from the modified m_heightGrid
+    setupTerrainVAO();                   // Reupload m_vertices to GPU
+    std::cout << "VAO updated." << std::endl;
+    //updateVAO
 }
 
 void Plane::buildTriangleMeshFromGrid(const std::vector<ngl::Vec3>& noisyGridVertices)
@@ -171,10 +234,8 @@ void Plane::setupTerrainVAO()
     std::cout << "Plane::setupTerrainVAO() - VAO configured with " << m_vertices.size() << " vertices." << std::endl;
 }
 
-
 void Plane::generate()
 {
- //Now has helper methods
 
     clearTerrainData();
 
