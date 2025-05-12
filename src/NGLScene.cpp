@@ -158,6 +158,30 @@ void NGLScene::setSpread(double _value)
         //update();
 }
 
+
+void NGLScene::updateGridDepth(int depth)
+{
+    if (m_plane) {
+        m_plane->setDepth(depth);
+        makeCurrent();
+        m_plane->regenerate();
+        doneCurrent();
+
+        update(); // Tell the NGL widget to repaint itself
+    }
+}
+
+void NGLScene::updateGridWidth(int width)
+{
+    if (m_plane) {
+        m_plane->setWidth(width);
+        makeCurrent();
+        m_plane->regenerate();
+        doneCurrent();
+
+        update();
+    }
+}
 void NGLScene::updateTerrainFrequency(float freq)
 {
     if (m_plane) {
@@ -166,10 +190,9 @@ void NGLScene::updateTerrainFrequency(float freq)
         m_plane->regenerate();
         doneCurrent();
 
-        update(); // Tell the NGL widget to repaint itself
+        update();
     }
 }
-
 void NGLScene::updateTerrainOctaves(int octaves)
 {
     if (m_plane) {
@@ -178,6 +201,10 @@ void NGLScene::updateTerrainOctaves(int octaves)
         m_plane->regenerate();
         doneCurrent();
 
-        update(); // Tell the NGL widget to repaint itself
+        update();
     }
 }
+
+
+
+

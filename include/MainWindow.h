@@ -16,6 +16,8 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    bool m_ratioLocked = false;
+
 
 private:
     Ui::MainWindow *m_ui;

@@ -53,6 +53,10 @@ class NGLScene : public QOpenGLWidget
     Emitter *getEmitter() { return m_emitter.get();}
     void updateTerrainFrequency(float freq);
     void updateTerrainOctaves(int octaves);
+    void updateGridWidth(int octaves);
+    void updateGridDepth(int octaves);
+
+
 
 public slots :
 

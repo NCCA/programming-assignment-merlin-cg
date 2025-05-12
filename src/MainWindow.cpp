@@ -17,23 +17,57 @@ MainWindow::MainWindow(QWidget *parent)
 
 
 
- //MainWindow.cpp UI handling
+ //UI control handling
+        if (m_ui->freqSpinBox) {
         connect(m_ui->freqSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
                 this, [this](double value) {
-                    if (m_gl) { // Check if m_gl is valid
+                    if (m_gl) {
                         m_gl->updateTerrainFrequency(static_cast<float>(value));
                     }
                 });
+        }
 
-        if (m_ui->octavesSpinBox) { // Check if the octaves spin box exists in your UI
+        if (m_ui->octavesSpinBox) {
             connect(m_ui->octavesSpinBox, QOverload<int>::of(&QSpinBox::valueChanged),
                     this, [this](int value) {
-                        if (m_gl) { // Check if m_gl is valid
+                        if (m_gl) {
                             m_gl->updateTerrainOctaves(value);
                         }
                     });
         }
 
+        if (m_ui->widthHorizontalSlider) {
+            connect(m_ui->widthHorizontalSlider, &QSlider::valueChanged,
+                    this, [this](int value) {
+                        if (m_gl) {
+                            m_gl->updateGridWidth(value);
+                            if (m_ratioLocked && m_ui->depthVerticalSlider->value() != value) {
+                                m_ui->depthVerticalSlider->setValue(value);
+                            }
+                        }
+                    });
+        }
+
+        if (m_ui->depthVerticalSlider) {
+            connect(m_ui->depthVerticalSlider, &QSlider::valueChanged,
+                    this, [this](int value) {
+                        if (m_gl) {
+                            m_gl->updateGridDepth(value);
+                            if (m_ratioLocked && m_ui->widthHorizontalSlider->value() != value) {
+                                m_ui->widthHorizontalSlider->setValue(value);
+                            }
+                        }
+                    });
+        }
+
+
+            if (m_ui->ratioLockCheckBox) {
+
+                connect(m_ui->ratioLockCheckBox, &QCheckBox::stateChanged,
+                        this, [this](int state) {
+                            m_ratioLocked = (state == Qt::Checked);
+                        });
+            }
 
 
     //OLD EXAMPLE
