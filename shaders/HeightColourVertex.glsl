@@ -12,5 +12,6 @@ void main()
     
     // Pass the original y-coordinate of the vertex as height
     outHeight = inVert.y;
+
 }
 

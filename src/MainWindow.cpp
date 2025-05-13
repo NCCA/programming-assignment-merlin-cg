@@ -36,6 +36,15 @@ MainWindow::MainWindow(QWidget *parent)
                     });
         }
 
+        if (m_ui->heightSpinBox) {
+            connect(m_ui->heightSpinBox, QOverload<int>::of(&QSpinBox::valueChanged),
+                    this, [this](int value) {
+                        if (m_gl) {
+                            m_gl->updateTerrainHeight(value);
+                        }
+                    });
+        }
+
         if (m_ui->widthHorizontalSlider) {
             connect(m_ui->widthHorizontalSlider, &QSlider::valueChanged,
                     this, [this](int value) {

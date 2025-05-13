@@ -1,13 +1,14 @@
 #version 330 core
 //HeightColourFragment
-in float outHeight; // Height received from vertex shader (original y-coordinate)
-
+in float outHeight;
 layout (location=0) out vec4 fragColour;
+
+
 
 void main()
 {
     float minTerrainHeight = 0.0;
-    float maxTerrainHeight = 30.0;
+    float maxTerrainHeight = 100.0;
 
     float normalizedHeight = clamp((outHeight - minTerrainHeight) / (maxTerrainHeight - minTerrainHeight), 0.0, 1.0);
 

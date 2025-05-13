@@ -33,6 +33,8 @@ public:
     float getNoiseFrequency() const { return m_noiseFrequency; }
     void setNoiseOctaves(int oct) { m_noiseOctaves = oct; }
     int getNoiseOctaves() const { return m_noiseOctaves; }
+    void setTerrainHeight(int height) { m_maxHeight = height; }
+    int getTerrainHeight() const { return m_maxHeight; }
     void refreshGPUAssets();
 
     //Erosion
@@ -57,6 +59,7 @@ private:
     std::unique_ptr<ngl::MultiBufferVAO> m_vao;
     float m_noiseFrequency = 2.0f;
     int m_noiseOctaves = 7;
+    int m_maxHeight = 30;
 
     // EROSION
     HeightAndGradientData getHeightAndGradient(float worldX, float worldZ) const;

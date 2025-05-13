@@ -14,6 +14,7 @@
 #include "PerlinNoise.hpp"
 #include <random>
 #include <ngl/Vec2.h>
+
 static bool s_isFirstGeneration = true;
 
 Plane::Plane(unsigned int _width, unsigned int _depth, float _spacing)
@@ -58,7 +59,6 @@ void Plane::applyPerlinNoiseToGrid()
 
     const siv::PerlinNoise::seed_type seed = 123456u;
     const siv::PerlinNoise perlin{seed};
-    float terrainMaxHeight = 30.0f;
     float planeTotalWidth = (m_width > 1) ? (m_width - 1) * m_spacing : 1.0f;
     float planeTotalDepth = (m_depth > 1) ? (m_depth - 1) * m_spacing : 1.0f;
     if (planeTotalWidth == 0.0f) planeTotalWidth = 1.0f;
@@ -73,7 +73,7 @@ void Plane::applyPerlinNoiseToGrid()
         float height_normalized = perlin.octave2D_01(noiseInputX * m_noiseFrequency,
                                                      noiseInputZ * m_noiseFrequency,
                                                      m_noiseOctaves);
-        vertex.m_y = height_normalized * terrainMaxHeight;
+        vertex.m_y = height_normalized * m_maxHeight;
     }
     std::cout << "Plane::applyPerlinNoiseToGrid() - applied noise to " << this->m_heightGrid.size() << " vertices in member m_heightGrid." << std::endl;
 }
@@ -147,7 +147,7 @@ void Plane::applyHydraulicErosion(int numDroplets, int dropletMaxLifetime /*, ..
 
     for (int i = 0; i < numDroplets; ++i) {
         // Initialize Droplet (as per previous snippets)
-        // ... (startX, startZ, create droplet instance) ...
+        // ... (startX, startZ, create droplet instance)
 
         float startX = ngl::Random::randomNumber(m_width * m_spacing);
         float startZ = ngl::Random::randomNumber(m_depth * m_spacing);
@@ -316,6 +316,7 @@ void Plane::render() const
     m_vao->bind();
     //gl->glEnable(GL_PROGRAM_POINT_SIZE);
     m_vao->draw();
+    //gl->glDisable(GL_POLYGON_OFFSET_FILL);
     //gl->glDisable(GL_PROGRAM_POINT_SIZE);
     m_vao->unbind();
 }

@@ -33,7 +33,7 @@ void NGLScene::initializeGL()
   // we must call that first before any other GL commands to load and link the
   // gl commands from the lib, if that is not done program will crash
   ngl::NGLInit::initialize();
-  glClearColor(0.4f, 0.4f, 0.4f, 1.0f);			   // Grey Background
+  glClearColor(0.4f, 0.4f, 0.4f, 1.0f);	   // Grey Background
   // enable depth testing for drawing
   glEnable(GL_DEPTH_TEST);
   // enable multisampling for smoother drawing
@@ -61,8 +61,6 @@ void NGLScene::initializeGL()
   emit glInitialized();
 }
 
-
-
 void NGLScene::paintGL()
 {
   // clear the screen and depth buffer
@@ -79,10 +77,15 @@ void NGLScene::paintGL()
   ngl::ShaderLib::setUniform("MVP",m_project*m_view*mouseRotation);
  // m_emitter->render();
 
-  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-
+ // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  //makeCurrent();
+  glPolygonMode(GL_FRONT_AND_BACK, m_wireframeMode ? GL_LINE : GL_FILL);
   m_plane->render();
+  //doneCurrent();
+
+  //m_plane->render();
+
+
   ngl::ShaderLib::use(ngl::nglColourShader);
   ngl::ShaderLib::setUniform("MVP",m_project*m_view*mouseRotation);
   ngl::ShaderLib::setUniform("Colour",1.0f,1.0f,1.0f,1.0f);
@@ -101,6 +104,17 @@ void NGLScene::paintGL()
 void NGLScene::keyReleaseEvent(QKeyEvent *_event)
 {
   m_keysPressed -=(Qt::Key)_event->key();
+    // switch (_event->key())
+  // {
+  // case Qt::Key_L :
+
+  //     if (m_plane)
+  //     {
+  //         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+  //         m_plane->render();
+  //     }
+  // }
 }
 
 void NGLScene::keyPressEvent(QKeyEvent *_event)
@@ -141,6 +155,15 @@ void NGLScene::keyPressEvent(QKeyEvent *_event)
 
         }
    */     break;
+
+          case Qt::Key_L :
+
+        if (m_plane)
+        {
+                  m_wireframeMode = !m_wireframeMode;
+                  update();
+                  break;
+        }
 
     default :
         break;
@@ -235,7 +258,18 @@ void NGLScene::updateTerrainOctaves(int octaves)
 
     }
 }
+void NGLScene::updateTerrainHeight(int height)
+{
+    if (m_plane) {
+        m_plane->setTerrainHeight(height);
+        makeCurrent();
+        m_plane->regenerate();
+        doneCurrent();
 
+        update();
+
+    }
+}
 
 
 

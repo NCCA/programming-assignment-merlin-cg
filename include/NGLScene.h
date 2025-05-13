@@ -53,8 +53,9 @@ class NGLScene : public QOpenGLWidget
     Emitter *getEmitter() { return m_emitter.get();}
     void updateTerrainFrequency(float freq);
     void updateTerrainOctaves(int octaves);
-    void updateGridWidth(int octaves);
-    void updateGridDepth(int octaves);
+    void updateGridWidth(int width);
+    void updateGridDepth(int depth);
+    void updateTerrainHeight(int height);
 
 
 
@@ -107,6 +108,8 @@ private:
     std::unique_ptr<Emitter> m_emitter;
     std::unique_ptr<Plane> m_plane;
     bool m_animate = true;
+    bool m_wireframeMode = false;
+
     ngl::Mat4 m_view;
     ngl::Mat4 m_project;
     std::chrono::steady_clock::time_point m_previousTime;
