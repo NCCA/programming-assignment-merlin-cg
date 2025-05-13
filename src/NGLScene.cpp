@@ -8,6 +8,7 @@
 #include <ngl/Util.h>
 #include <iostream>
 #include <QCoreApplication> // For QCoreApplication::processEvents()
+#include <ngl/VAOFactory.h>
 
 NGLScene::NGLScene(QWidget *_parent) :QOpenGLWidget(_parent)
 {
@@ -50,7 +51,7 @@ void NGLScene::initializeGL()
   //ngl::ShaderLib::loadShader("WireframeShader","shaders/WireframeFragment.glsl","shaders/WireFrameVertex.glsl");
 
 
-  ngl::ShaderLib::use("HeightColourShader");
+  //ngl::ShaderLib::use("HeightColourShader");
   m_view = ngl::lookAt({0,40,80},{0,0,0},{0,1,0});
   m_previousTime=std::chrono::steady_clock::now();
 
@@ -81,6 +82,12 @@ void NGLScene::paintGL()
   //makeCurrent();
   glPolygonMode(GL_FRONT_AND_BACK, m_wireframeMode ? GL_LINE : GL_FILL);
   m_plane->render();
+
+  ngl::ShaderLib::use("ColourShader");
+  ngl::ShaderLib::setUniform("MVP",m_project*m_view*mouseRotation);
+
+  m_emitter->drawTrailPoints(m_plane->getDropletTrailPoints());
+
   //doneCurrent();
 
   //m_plane->render();

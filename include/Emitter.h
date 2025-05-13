@@ -22,6 +22,7 @@ public :
     void render() const;
     void move(float _dx, float _dy, float _dz);
     void setSpread(float _value);
+    void drawTrailPoints(const std::vector<ngl::Vec4> &_points) const;
 
 public slots:
     void setNumPerFrame(int _value){m_numPerFrame=_value;}

@@ -37,9 +37,11 @@ public:
     int getTerrainHeight() const { return m_maxHeight; }
     void refreshGPUAssets();
 
+
+
     //Erosion
     void applyHydraulicErosion(int numDroplets, int dropletMaxLifetime /*, other params */);
-    const std::vector<ngl::Vec3>& getDropletTrailPoints() const { return m_dropletTrailPoints; }
+    const std::vector<ngl::Vec4>& getDropletTrailPoints() const { return m_dropletTrailPoints; }
 
 private:
     // Helper methods for generation
@@ -63,8 +65,7 @@ private:
 
     // EROSION
     HeightAndGradientData getHeightAndGradient(float worldX, float worldZ) const;
-    std::vector<ngl::Vec3> m_dropletTrailPoints;
-
+    std::vector<ngl::Vec4> m_dropletTrailPoints;
 
     struct Droplet {
         ngl::Vec2 pos;          // Current 2D position (world coordinates)
@@ -79,6 +80,15 @@ private:
             : pos(startPos), dir(0.0f, 0.0f), speed(initialSpeed),
             water(initialWater), sediment(0.0f), lifetime(maxLifetime) {}
     };
+
+
+
+
+
+
+
+
+
 
 
     int m_erosionIterations = 15000; // Default

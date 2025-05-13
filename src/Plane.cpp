@@ -14,6 +14,7 @@
 #include "PerlinNoise.hpp"
 #include <random>
 #include <ngl/Vec2.h>
+#include "Emitter.h"
 
 static bool s_isFirstGeneration = true;
 
@@ -70,9 +71,9 @@ void Plane::applyPerlinNoiseToGrid()
         float current_z_pos = vertex.m_z;
         float noiseInputX = (m_width == 1) ? 0.0f : current_x_pos / planeTotalWidth;
         float noiseInputZ = (m_depth == 1) ? 0.0f : current_z_pos / planeTotalDepth;
-        float height_normalized = perlin.octave2D_01(noiseInputX * m_noiseFrequency,
+        float height_normalized = std::abs(perlin.octave2D_01(noiseInputX * m_noiseFrequency,
                                                      noiseInputZ * m_noiseFrequency,
-                                                     m_noiseOctaves);
+                                                                     m_noiseOctaves, 0.5));
         vertex.m_y = height_normalized * m_maxHeight;
     }
     std::cout << "Plane::applyPerlinNoiseToGrid() - applied noise to " << this->m_heightGrid.size() << " vertices in member m_heightGrid." << std::endl;
@@ -104,7 +105,7 @@ HeightAndGradientData Plane::getHeightAndGradient(float worldX, float worldZ) co
     int x1 = coordX + 1;
     int z1 = coordZ + 1;
 
-    // Essential clamping to prevent out-of-bounds access
+    // clamping to prevent out-of-bounds access
     int c_x0 = std::clamp(x0, 0, static_cast<int>(m_width) - 1);
     int c_z0 = std::clamp(z0, 0, static_cast<int>(m_depth) - 1);
     int c_x1 = std::clamp(x1, 0, static_cast<int>(m_width) - 1);
@@ -148,23 +149,36 @@ void Plane::applyHydraulicErosion(int numDroplets, int dropletMaxLifetime /*, ..
     for (int i = 0; i < numDroplets; ++i) {
         // Initialize Droplet (as per previous snippets)
         // ... (startX, startZ, create droplet instance)
+        int randGridX = ngl::Random::randomPositiveNumber(m_width - 1);
+        int randGridZ = ngl::Random::randomPositiveNumber(m_depth - 1);
 
-        float startX = ngl::Random::randomNumber(m_width * m_spacing);
-        float startZ = ngl::Random::randomNumber(m_depth * m_spacing);
+        float startX = static_cast<float>(randGridX) * m_spacing;
+        float startZ = static_cast<float>(randGridZ) * m_spacing;
         Droplet droplet(ngl::Vec2(startX, startZ), m_initialSpeed, m_initialWaterAmount, dropletMaxLifetime);
 
-        for (int step = 0; step < droplet.lifetime; ++step) {
-            // Get current terrain height at droplet.pos.m_x, droplet.pos.m_y
+        for (int step = 0; step < droplet.lifetime; ++step)
+        {
             HeightAndGradientData hgDataOld = getHeightAndGradient(droplet.pos.m_x, droplet.pos.m_y);
-            float currentTerrainHeight = hgDataOld.height; // Height BEFORE moving
+            float currentTerrainHeight = hgDataOld.height;
 
-            // Store the current position and its height for the trail
-            m_dropletTrailPoints.push_back(ngl::Vec3(droplet.pos.m_x, currentTerrainHeight, droplet.pos.m_y));
+            // Record current position
 
-            // If droplet is still alive and on map, it will loop and its new position will be added at the start of the next iteration.
+            droplet.dir.m_x = (droplet.dir.m_x * m_inertiaFactor - hgDataOld.rawGradientAscent.m_x * (1-m_inertiaFactor));
+            droplet.dir.m_y = (droplet.dir.m_y * m_inertiaFactor - hgDataOld.rawGradientAscent.m_y * (1-m_inertiaFactor));
+
+            droplet.pos.m_x += droplet.dir.m_x;
+            droplet.pos.m_y += droplet.dir.m_y;
+
+            m_dropletTrailPoints.push_back(ngl::Vec4(droplet.pos.m_x, currentTerrainHeight, droplet.pos.m_y, droplet.lifetime));
+
+
+            // --- Simple fake movement for testing ---
+            //droplet.pos.m_x += 0.6f;  // small step in x
+            //droplet.pos.m_y += 0.6f;  // small step in z (2D pos is x/y in Vec2)
         }
     }
     // After the simulation, m_dropletTrailPoints contains all the path points.
+
 }
 
 //Sebastian Lague's Erosion outline:
@@ -256,20 +270,15 @@ void Plane::setupTerrainVAO()
         return; // Exit if no vertices to upload
     }
 
-    // Create and populate the VAO with the data from m_vertices.
     m_vao = ngl::vaoFactoryCast<ngl::MultiBufferVAO>(
         ngl::VAOFactory::createVAO(ngl::multiBufferVAO, GL_TRIANGLES));
 
     m_vao->bind();
 
-    // Set vertex data.
-    // The MultiBufferVAO::VertexData constructor takes (size_in_bytes, pointer_to_first_element_component).
     m_vao->setData(ngl::MultiBufferVAO::VertexData(m_vertices.size() * sizeof(ngl::Vec3), m_vertices[0].m_x));
 
-    // Set the vertex attribute pointer for positions (attribute location 0).
     m_vao->setVertexAttributePointer(0, 3, GL_FLOAT, 0, 0);
 
-    // Set the number of vertices to draw.
     m_vao->setNumIndices(m_vertices.size());
 
     m_vao->unbind();
@@ -286,9 +295,11 @@ void Plane::generate()
 
     applyPerlinNoiseToGrid();
 
+
+    applyHydraulicErosion(500,30);
+
     buildTriangleMeshFromGrid(m_heightGrid);
 
-    //applyHydraulicErosion();
     setupTerrainVAO();
 
     std::cout << "Plane::generate() - completed. Final m_vertices size for VAO: " << m_vertices.size() << std::endl;
