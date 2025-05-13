@@ -12,6 +12,8 @@
 #include <ngl/Util.h>
 #include <ngl/VAOFactory.h>
 #include "PerlinNoise.hpp"
+#include <random>
+#include <ngl/Vec2.h>
 static bool s_isFirstGeneration = true;
 
 Plane::Plane(unsigned int _width, unsigned int _depth, float _spacing)
@@ -56,7 +58,7 @@ void Plane::applyPerlinNoiseToGrid()
 
     const siv::PerlinNoise::seed_type seed = 123456u;
     const siv::PerlinNoise perlin{seed};
-    float terrainMaxHeight = 8.0f;
+    float terrainMaxHeight = 30.0f;
     float planeTotalWidth = (m_width > 1) ? (m_width - 1) * m_spacing : 1.0f;
     float planeTotalDepth = (m_depth > 1) ? (m_depth - 1) * m_spacing : 1.0f;
     if (planeTotalWidth == 0.0f) planeTotalWidth = 1.0f;
@@ -76,8 +78,94 @@ void Plane::applyPerlinNoiseToGrid()
     std::cout << "Plane::applyPerlinNoiseToGrid() - applied noise to " << this->m_heightGrid.size() << " vertices in member m_heightGrid." << std::endl;
 }
 
-//TODO: GetInterpolatedHeight function
-//TODO: CalculateGradient function
+HeightAndGradientData Plane::getHeightAndGradient(float worldX, float worldZ) const
+{
+    HeightAndGradientData result;
+
+    if (m_heightGrid.empty() || m_spacing == 0.0f || m_width == 0 || m_depth == 0) {
+        // Optional: Log an error or handle as appropriate
+        // std::cerr << "Error: Cannot calculate height/gradient. Invalid grid state." << std::endl;
+        return result; // Return default (zeroed) data
+    }
+
+    float gridFloatX = worldX / m_spacing;
+    float gridFloatZ = worldZ / m_spacing;
+
+    int coordX = static_cast<int>(std::floor(gridFloatX));
+    int coordZ = static_cast<int>(std::floor(gridFloatZ));
+
+    // Calculate droplet's offset inside the cell (0,0) = at NW node, (1,1) = at SE node
+    float offsetX = gridFloatX - coordX;
+    float offsetZ = gridFloatZ - coordZ;
+
+    // Define and clamp coordinates for the four cell corners for safe array access
+    int x0 = coordX;
+    int z0 = coordZ;
+    int x1 = coordX + 1;
+    int z1 = coordZ + 1;
+
+    // Essential clamping to prevent out-of-bounds access
+    int c_x0 = std::clamp(x0, 0, static_cast<int>(m_width) - 1);
+    int c_z0 = std::clamp(z0, 0, static_cast<int>(m_depth) - 1);
+    int c_x1 = std::clamp(x1, 0, static_cast<int>(m_width) - 1);
+    int c_z1 = std::clamp(z1, 0, static_cast<int>(m_depth) - 1);
+
+    // Calculate heights of the four nodes of the droplet's cell
+    // Assumes m_heightGrid is 1D: index = z * m_width + x
+    float hNW = m_heightGrid[c_z0 * m_width + c_x0].m_y;
+    float hNE = m_heightGrid[c_z0 * m_width + c_x1].m_y;
+    float hSW = m_heightGrid[c_z1 * m_width + c_x0].m_y;
+    float hSE = m_heightGrid[c_z1 * m_width + c_x1].m_y;
+
+    // Calculate droplet's direction of flow (gradient) with bilinear interpolation of height difference along the edges
+    // This is the gradient of ascent
+    result.rawGradientAscent.m_x = (hNE - hNW) * (1.0f - offsetZ) + (hSE - hSW) * offsetZ;
+    result.rawGradientAscent.m_y = (hSW - hNW) * (1.0f - offsetX) + (hSE - hNE) * offsetX; // m_y for Z-gradient
+
+    // Calculate height with bilinear interpolation of the heights of the nodes of the cell
+    float height_lerp_bottom = hNW * (1.0f - offsetX) + hNE * offsetX;
+    float height_lerp_top    = hSW * (1.0f - offsetX) + hSE * offsetX;
+    result.height = height_lerp_bottom * (1.0f - offsetZ) + height_lerp_top * offsetZ;
+
+    // Alternative for height interpolation (matches your C# example more directly):
+    // result.height = hNW * (1.0f - offsetX) * (1.0f - offsetZ) +
+    //                 hNE * offsetX * (1.0f - offsetZ) +
+    //                 hSW * (1.0f - offsetX) * offsetZ +
+    //                 hSE * offsetX * offsetZ;
+
+    return result;
+}
+
+// In Plane.cpp (definition)
+void Plane::applyHydraulicErosion(int numDroplets, int dropletMaxLifetime /*, ... */)
+{
+    if (m_heightGrid.empty()) { /* ... error handling ... */ return; }
+
+    m_dropletTrailPoints.clear(); // Clear previous trails before starting a new simulation
+    // m_dropletTrailPoints.reserve(numDroplets * dropletMaxLifetime);
+
+
+    for (int i = 0; i < numDroplets; ++i) {
+        // Initialize Droplet (as per previous snippets)
+        // ... (startX, startZ, create droplet instance) ...
+
+        float startX = ngl::Random::randomNumber(m_width * m_spacing);
+        float startZ = ngl::Random::randomNumber(m_depth * m_spacing);
+        Droplet droplet(ngl::Vec2(startX, startZ), m_initialSpeed, m_initialWaterAmount, dropletMaxLifetime);
+
+        for (int step = 0; step < droplet.lifetime; ++step) {
+            // Get current terrain height at droplet.pos.m_x, droplet.pos.m_y
+            HeightAndGradientData hgDataOld = getHeightAndGradient(droplet.pos.m_x, droplet.pos.m_y);
+            float currentTerrainHeight = hgDataOld.height; // Height BEFORE moving
+
+            // Store the current position and its height for the trail
+            m_dropletTrailPoints.push_back(ngl::Vec3(droplet.pos.m_x, currentTerrainHeight, droplet.pos.m_y));
+
+            // If droplet is still alive and on map, it will loop and its new position will be added at the start of the next iteration.
+        }
+    }
+    // After the simulation, m_dropletTrailPoints contains all the path points.
+}
 
 //Sebastian Lague's Erosion outline:
     // Erode(map)
@@ -103,53 +191,8 @@ void Plane::applyPerlinNoiseToGrid()
 
 
 
-//Keeping this embedded here temporarily.
-struct ErosionDroplet {
-    float posX, posZ;       // Current position
-    float dirX, dirZ;       // Direction vector
-    float speed;            // Current speed
-    float water;            // Amount of water carried
-    float sediment;         // Amount of sediment carried
-    int lifetime;           // Steps remaining
-
-    // Constructor for convenience
-    ErosionDroplet(float x, float z, float initialSpeed, float initialWater, int maxLifetime)
-        : posX(x), posZ(z), dirX(0.0f), dirZ(0.0f), speed(initialSpeed),
-        water(initialWater), sediment(0.0f), lifetime(maxLifetime) {}
-};
-
-void Plane::applyHydraulicErosion() { //TODO:  Let It Rain
-    if (m_heightGrid.empty()) {
-        std::cerr << "Error: Height grid is empty. Cannot apply erosion." << std::endl;
-        return;
-    }
-    std::cout << "Applying hydraulic erosion..." << std::endl;
-    std::cout << "Parameters: Iterations = " << m_erosionIterations
-              << ", Particles/Iteration = " << m_numErosionDropletsPerIteration
-              << ", Max Lifetime = " << m_numErosionDropletsPerIteration
-              << std::endl;
-    std::cout << "Sediment Capacity Factor: " << m_sedimentCapacityFactor
-              << ", Erosion Rate: " << m_erosionRate
-              << ", Deposition Rate: " << m_depositionRate << std::endl;
-
-    //ngl::Random::randomPositiveNumber()
-
-    std::cout << "Hydraulic erosion simulation started." << std::endl;
 
 
-/////////////////////
-
-
-    std::cout << "Hydraulic erosion simulation finished." << std::endl;
-
-    // After erosion, the m_heightGrid has changed.
-    // We need to rebuild the renderable vertex buffer (m_vertices) and update the VAO.
-    std::cout << "Rebuilding triangle mesh and VAO from eroded height grid..." << std::endl;
-    buildTriangleMeshFromGrid(m_heightGrid); // Rebuild m_vertices from the modified m_heightGrid
-    setupTerrainVAO();                   // Reupload m_vertices to GPU
-    std::cout << "VAO updated." << std::endl;
-    //updateVAO
-}
 
 void Plane::buildTriangleMeshFromGrid(const std::vector<ngl::Vec3>& noisyGridVertices)
 {
@@ -245,6 +288,7 @@ void Plane::generate()
 
     buildTriangleMeshFromGrid(m_heightGrid);
 
+    //applyHydraulicErosion();
     setupTerrainVAO();
 
     std::cout << "Plane::generate() - completed. Final m_vertices size for VAO: " << m_vertices.size() << std::endl;
@@ -258,6 +302,11 @@ void Plane::regenerate()
 
 }
 
+void Plane::refreshGPUAssets()
+{
+buildTriangleMeshFromGrid(m_heightGrid);
+setupTerrainVAO();
+}
 void Plane::render() const
 {
   //  auto *gl = QOpenGLContext::currentContext()->functions();

@@ -7,10 +7,12 @@
 #include <ngl/Transformation.h>
 #include <ngl/Util.h>
 #include <iostream>
+#include <QCoreApplication> // For QCoreApplication::processEvents()
 
 NGLScene::NGLScene(QWidget *_parent) :QOpenGLWidget(_parent)
 {
-
+    setFocusPolicy(Qt::StrongFocus); // Allow the widget to receive focus by tabbing and clicking
+    setFocus(); // Give focus to the widget immediately
 }
 
 NGLScene::~NGLScene()
@@ -31,7 +33,7 @@ void NGLScene::initializeGL()
   // we must call that first before any other GL commands to load and link the
   // gl commands from the lib, if that is not done program will crash
   ngl::NGLInit::initialize();
-  glClearColor(0.7f, 0.7f, 0.7f, 1.0f);			   // Grey Background
+  glClearColor(0.4f, 0.4f, 0.4f, 1.0f);			   // Grey Background
   // enable depth testing for drawing
   glEnable(GL_DEPTH_TEST);
   // enable multisampling for smoother drawing
@@ -40,11 +42,13 @@ void NGLScene::initializeGL()
   ngl::VAOPrimitives::createLineGrid("floor",100,100,50);
   m_emitter=std::make_unique<Emitter>(10000,10000,800,ngl::Vec3(0,0,0));
 
-  m_plane = std::make_unique<Plane>(500, 500, 0.1f);
+  m_plane = std::make_unique<Plane>(250, 250, 0.25f);
 
   //m_plane->applyPerlinNoise(0.1f, 10.0f); // scale, amplitude
   ngl::ShaderLib::loadShader("ColourShader","shaders/ColourVertex.glsl","shaders/ColourFragment.glsl");
   ngl::ShaderLib::loadShader("HeightColourShader","shaders/HeightColourVertex.glsl","shaders/HeightColourFragment.glsl");
+  //ngl::ShaderLib::loadShader("WireframeShader","shaders/WireframeFragment.glsl","shaders/WireFrameVertex.glsl");
+
 
   ngl::ShaderLib::use("HeightColourShader");
   m_view = ngl::lookAt({0,40,80},{0,0,0},{0,1,0});
@@ -74,6 +78,10 @@ void NGLScene::paintGL()
   ngl::ShaderLib::use("HeightColourShader");
   ngl::ShaderLib::setUniform("MVP",m_project*m_view*mouseRotation);
  // m_emitter->render();
+
+  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+
   m_plane->render();
   ngl::ShaderLib::use(ngl::nglColourShader);
   ngl::ShaderLib::setUniform("MVP",m_project*m_view*mouseRotation);
@@ -97,24 +105,46 @@ void NGLScene::keyReleaseEvent(QKeyEvent *_event)
 
 void NGLScene::keyPressEvent(QKeyEvent *_event)
 {
-  m_keysPressed +=(Qt::Key)_event->key();
-  // this method is called every time the main window recives a key event.
-  // we then switch on the key value and set the camera in the GLWindow
-  switch (_event->key())
-  {
-  // escape key to quite
-  case Qt::Key_Escape : QGuiApplication::exit(EXIT_SUCCESS); break;
-  case Qt::Key_Space :
-      m_win.spinXFace=0;
-      m_win.spinYFace=0;
-      m_modelPos.set(ngl::Vec3::zero());
-  break;
-    case Qt::Key_A : m_animate^=true; break;
-  default : break;
-  }
-  // finally update the GLWindow and re-draw
+    std::cout << "NGLScene::keyPressEvent called. Key: " << _event->key() << std::endl; // <-- ADD THIS LINE
 
-    update();
+    // ... rest of your keyPressEvent logic ...
+    switch (_event->key())
+    {
+        // ... (your other existing key cases like Key_W, Key_S, etc.) ...
+
+  /*  case Qt::Key_E :
+        if (m_plane)
+        {
+            std::cout << "E key pressed - applying hydraulic erosion with progressive updates." << std::endl;
+
+            makeCurrent(); // Make the OpenGL context current for this thread
+
+            // Call applyHydraulicErosion on the plane, passing a lambda function as the callback.
+            m_plane->applyHydraulicErosion([this]() {
+                makeCurrent(); // Make context current for this specific progressive update step
+                if (m_plane) {
+                    m_plane->refreshGPUAssets(); // Tell the plane to update its GPU assets
+                }
+                this->update(); // Schedule a repaint
+                QCoreApplication::processEvents(); // Process events, including the repaint
+                doneCurrent(); // Release context for this step
+            });
+            // applyHydraulicErosion (the CPU part) has now finished.
+            // m_heightGrid in m_plane is in its final state.
+            // Now, explicitly update the GPU assets for the final state from NGLScene.
+            std::cout << "Erosion CPU work finished. Performing final GPU update for display." << std::endl;
+            makeCurrent(); // Establish context for the FINAL GPU update
+            if (m_plane) {
+                m_plane->refreshGPUAssets(); // Tell the plane to update its VAO with the final terrain data
+            }
+            doneCurrent(); // Release context for the FINAL GPU update
+
+        }
+   */     break;
+
+    default :
+        break;
+    }
 }
 
 void NGLScene::process_keys()
@@ -189,8 +219,8 @@ void NGLScene::updateTerrainFrequency(float freq)
         makeCurrent();
         m_plane->regenerate();
         doneCurrent();
-
         update();
+
     }
 }
 void NGLScene::updateTerrainOctaves(int octaves)
@@ -202,6 +232,7 @@ void NGLScene::updateTerrainOctaves(int octaves)
         doneCurrent();
 
         update();
+
     }
 }
 

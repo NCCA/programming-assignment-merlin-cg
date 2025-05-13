@@ -15,7 +15,6 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS ${PROJECT_SOURCE_DIR}/ui/)
 
 add_executable(${TargetName})
 
-#     ../../../../Downloads/PerlinNoise.hpp)
 target_sources(${TargetName} PRIVATE
         src/main.cpp
         src/MainWindow.cpp
@@ -38,6 +37,8 @@ target_sources(${TargetName} PRIVATE
         shaders/ColourVertex.glsl
         shaders/HeightColourFragment.glsl
         shaders/HeightColourVertex.glsl
+        shaders/PhongFragment.glsl
+        shaders/PhongVertex.glsl
 )
 
 target_include_directories(ParticleQt PRIVATE include)
