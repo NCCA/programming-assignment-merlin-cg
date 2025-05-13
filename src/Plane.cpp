@@ -141,7 +141,7 @@ HeightAndGradientData Plane::getHeightAndGradient(float worldX, float worldZ) co
 void Plane::applyHydraulicErosion(int numDroplets, int dropletMaxLifetime /*, ... */)
 {
     if (m_heightGrid.empty()) { /* ... error handling ... */ return; }
-
+    int speed;
     m_dropletTrailPoints.clear(); // Clear previous trails before starting a new simulation
     // m_dropletTrailPoints.reserve(numDroplets * dropletMaxLifetime);
 
@@ -156,29 +156,61 @@ void Plane::applyHydraulicErosion(int numDroplets, int dropletMaxLifetime /*, ..
         float startZ = static_cast<float>(randGridZ) * m_spacing;
         Droplet droplet(ngl::Vec2(startX, startZ), m_initialSpeed, m_initialWaterAmount, dropletMaxLifetime);
 
-        for (int step = 0; step < droplet.lifetime; ++step)
+        for (int step = 0; step < dropletMaxLifetime; ++step)
         {
             HeightAndGradientData hgDataOld = getHeightAndGradient(droplet.pos.m_x, droplet.pos.m_y);
-            float currentTerrainHeight = hgDataOld.height;
+            float originalTerrainHeight = hgDataOld.height;
 
             // Record current position
 
-            droplet.dir.m_x = (droplet.dir.m_x * m_inertiaFactor - hgDataOld.rawGradientAscent.m_x * (1-m_inertiaFactor));
-            droplet.dir.m_y = (droplet.dir.m_y * m_inertiaFactor - hgDataOld.rawGradientAscent.m_y * (1-m_inertiaFactor));
+            droplet.dir.m_x = (droplet.dir.m_x * m_inertiaFactor - hgDataOld.rawGradientAscent.m_x * (1 - m_inertiaFactor));
+            droplet.dir.m_y = (droplet.dir.m_y * m_inertiaFactor - hgDataOld.rawGradientAscent.m_y * (1 - m_inertiaFactor));
+
+            float length = std::sqrt((droplet.dir.m_x * droplet.dir.m_x) + (droplet.dir.m_y * droplet.dir.m_y));
+            if (length != 0) {
+                droplet.dir.m_x /= length;
+                droplet.dir.m_y /= length;
+            }
 
             droplet.pos.m_x += droplet.dir.m_x;
             droplet.pos.m_y += droplet.dir.m_y;
 
-            m_dropletTrailPoints.push_back(ngl::Vec4(droplet.pos.m_x, currentTerrainHeight, droplet.pos.m_y, droplet.lifetime));
+            m_dropletTrailPoints.push_back(ngl::Vec4(droplet.pos.m_x, originalTerrainHeight, droplet.pos.m_y, static_cast<float>(droplet.lifetime)));
+
+            droplet.lifetime--;
+            if (droplet.lifetime <= 0 /* || droplet.water <= 0.001f */ ) { // Add water check if you have evaporation
+                break; // End this droplet's simulation
+            }
+            // If droplet moves off map, also break
+            if (droplet.pos.m_x < 0.0f || droplet.pos.m_x >= m_width * m_spacing ||
+                droplet.pos.m_y < 0.0f || droplet.pos.m_y >= m_depth * m_spacing) {
+                break;
+            }
 
 
-            // --- Simple fake movement for testing ---
-            //droplet.pos.m_x += 0.6f;  // small step in x
-            //droplet.pos.m_y += 0.6f;  // small step in z (2D pos is x/y in Vec2)
+            float newHeight = getHeightAndGradient(droplet.pos.m_x, droplet.pos.m_y).height;
+            float deltaHeight = newHeight - originalTerrainHeight;
+
+            float sedimentCapacity = std::max(-deltaHeight * droplet.speed * droplet.water * m_sedimentCapacityFactor, m_minSedimentCapacity);
+
+            if (droplet.sediment > sedimentCapacity)
+            {
+                float amountToDeposit = (deltaHeight > 0) ? std::min(deltaHeight, droplet.sediment) : (droplet.sediment - sedimentCapacity) * m_depositionRate;
+                droplet.sediment -= amountToDeposit;
+
+                // Deposit sediment to the four corners of current grid cell using bilinear interpolation.
+            }
+
+            else
+            {
+                float amountToErode = std::min((sedimentCapacity - droplet.sediment) * m_erosionRate, -deltaHeight);
+            }
+        droplet.speed = std::sqrt(std::max(0.0f, droplet.speed * droplet.speed + (-deltaHeight) * m_gravity));
+        droplet.water *= (1.0f - m_evaporationRate);
+        //update droplet's speed
         }
     }
     // After the simulation, m_dropletTrailPoints contains all the path points.
-
 }
 
 //Sebastian Lague's Erosion outline:
@@ -296,7 +328,7 @@ void Plane::generate()
     applyPerlinNoiseToGrid();
 
 
-    applyHydraulicErosion(500,30);
+    applyHydraulicErosion(25000,30);
 
     buildTriangleMeshFromGrid(m_heightGrid);
 
@@ -310,7 +342,6 @@ void Plane::regenerate()
 {
     std::cout << "Plane::regenerate() called. Frequency: " << m_noiseFrequency << ", Octaves: " << m_noiseOctaves << std::endl;
     generate(); // Re-run the generation logic
-
 }
 
 void Plane::refreshGPUAssets()
@@ -318,6 +349,7 @@ void Plane::refreshGPUAssets()
 buildTriangleMeshFromGrid(m_heightGrid);
 setupTerrainVAO();
 }
+
 void Plane::render() const
 {
   //  auto *gl = QOpenGLContext::currentContext()->functions();

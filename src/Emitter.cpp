@@ -53,14 +53,14 @@ void Emitter::drawTrailPoints(const std::vector<ngl::Vec4> &_points) const
     std::vector<ngl::Vec4> pointData = _points;
 
     // Color data — use w (lifetime) as red channel
-    std::vector<ngl::Vec3> colorData;
-    colorData.reserve(_points.size());
+    std::vector<ngl::Vec3> colourData;
+    colourData.reserve(_points.size());
 
     for (const auto &p : _points)
     {
         float red = p.m_w / 100.0f; // Using lifetime as colour
-        red = std::clamp(red, 0.0f, 1.0f);
-        colorData.emplace_back(red, 0.0f, 0.0f);
+        red = std::clamp(red, 0.0f, 100.0f);
+        colourData.emplace_back(red, 0.0f, 0.0f);
     }
 
     m_vao->bind();
@@ -71,14 +71,14 @@ void Emitter::drawTrailPoints(const std::vector<ngl::Vec4> &_points) const
     m_vao->setVertexAttributePointer(0, 4, GL_FLOAT, 0, 0);
 
     // Upload colors
-    m_vao->setData(1, ngl::MultiBufferVAO::VertexData(colorData.size() * sizeof(ngl::Vec3),
-                                                      colorData[0].m_x));
+    m_vao->setData(1, ngl::MultiBufferVAO::VertexData(colourData.size() * sizeof(ngl::Vec3),
+                                                      colourData[0].m_x));
     m_vao->setVertexAttributePointer(1, 3, GL_FLOAT, 0, 0);
 
     m_vao->setNumIndices(_points.size());
 
     glEnable(GL_PROGRAM_POINT_SIZE);
-    glPointSize(10.0f);
+    glPointSize(3.0f);
     m_vao->draw();
     glDisable(GL_PROGRAM_POINT_SIZE);
     m_vao->unbind();
