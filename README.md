@@ -25,3 +25,5 @@ Added some UI controls for the grid and noise generation.
 
 
 ## Hydraulic Erosion (In progress)
+![image](https://github.com/user-attachments/assets/4f1f47f2-3d0e-45a0-9554-4e8daba467b4)
+Visualised the droplet simulation, just need to implement sediment erosion and deposition based on each droplet.  
