@@ -29,5 +29,5 @@ Added some UI controls for the grid and noise generation.
 Visualised the droplet simulation, just need to implement sediment erosion and deposition based on each droplet.  
 
 ![image](https://github.com/user-attachments/assets/2fb6b1c4-df21-4d7a-bfe2-fa17dcf5c523)
-Before erosion vs After
+Before erosion vs After (60,000 droplets)
 ![image](https://github.com/user-attachments/assets/c88e3eb1-f9b6-4e23-9254-c05388783a32)
