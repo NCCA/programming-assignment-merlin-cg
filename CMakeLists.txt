@@ -12,9 +12,9 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets OpenGLWidgets)
 find_package(NGL CONFIG REQUIRED)
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${PROJECT_SOURCE_DIR}/ui/)
+qt_add_resources(DARK_STYLE_RCC qdarkstyle/dark/darkstyle.qrc)
 
 add_executable(${TargetName})
-
 target_sources(${TargetName} PRIVATE
         src/main.cpp
         src/MainWindow.cpp
@@ -39,7 +39,10 @@ target_sources(${TargetName} PRIVATE
         shaders/HeightColourVertex.glsl
         shaders/PhongFragment.glsl
         shaders/PhongVertex.glsl
+
+        ${DARK_STYLE_RCC}
 )
+
 
 target_include_directories(ParticleQt PRIVATE include)
 target_link_libraries(ParticleQt PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::OpenGLWidgets)

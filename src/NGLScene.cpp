@@ -55,6 +55,7 @@ void NGLScene::initializeGL()
   //ngl::ShaderLib::use("HeightColourShader");
   m_view = ngl::lookAt({150.0f, 100.0f, 450.0f}, {150.0f, 0.0f, 150.0f}, {0.0f, 1.0f, 0.0f});
   m_previousTime=std::chrono::steady_clock::now();
+  //ngl::ShaderLib::setUniform("maxTerrainHeight", m_plane->getTerrainHeight());
 
   // m_text = std::make_unique<ngl::Text>("fonts/DejaVuSansMono.ttf",16);
   // m_text->setScreenSize(width(),height());
@@ -74,9 +75,10 @@ void NGLScene::paintGL()
   mouseRotation.m_m[3][0]=m_modelPos.m_x;
   mouseRotation.m_m[3][1]=m_modelPos.m_y;
   mouseRotation.m_m[3][2]=m_modelPos.m_z;
-
   ngl::ShaderLib::use("HeightColourShader");
   ngl::ShaderLib::setUniform("MVP",m_project*m_view*mouseRotation);
+  ngl::ShaderLib::setUniform("maxTerrainHeight", m_plane->getTerrainHeight());
+
  // m_emitter->render();
 
  // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -156,7 +158,7 @@ void NGLScene::keyPressEvent(QKeyEvent *_event)
         }
         break;
 
-          case Qt::Key_L :
+          case Qt::Key_R :
 
         if (m_plane)
         {
@@ -188,7 +190,6 @@ void NGLScene::process_keys()
       case Qt::Key_Right : dx +=inc; break;
       case Qt::Key_Up : dz += inc; break;
       case Qt::Key_Down : dz -=inc; break;
-
     }
   }
 m_emitter->move(dx,dy,dz);
@@ -266,6 +267,8 @@ void NGLScene::updateTerrainHeight(int height)
     if (m_plane) {
         m_plane->setTerrainHeight(height);
         makeCurrent();
+
+        ngl::ShaderLib::setUniform("maxTerrainHeight", m_plane->getTerrainHeight());
         m_plane->regenerate();
         doneCurrent();
 

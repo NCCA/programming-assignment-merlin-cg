@@ -251,6 +251,8 @@ void Plane::applyHydraulicErosion(int numDroplets, int dropletMaxLifetime /*, ..
                     m_heightGrid[indexSW].m_y += depositSW;
                     m_heightGrid[indexSE].m_y += depositSE;
 
+
+
                 }
 
                 //std::cout << "S[" << step << "] DEPO: DropletSediment_After: " << droplet.sediment << std::endl;
@@ -512,6 +514,8 @@ void Plane::render() const
     if (!m_vao || m_vao->numIndices() == 0) { // Add a check to prevent drawing an invalid/empty VAO
         return;
     }
+
+
     m_vao->bind();
     //gl->glEnable(GL_PROGRAM_POINT_SIZE);
     m_vao->draw();
