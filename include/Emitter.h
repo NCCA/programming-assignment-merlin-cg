@@ -44,5 +44,6 @@ private :
     ngl::Vec3 randomVectorOnSphere(float _radius = 1.0f);
     std::unique_ptr<ngl::MultiBufferVAO> m_vao;
     float m_spread = 1.0;
+    bool m_showTrailPoints = true;
 };
 #endif

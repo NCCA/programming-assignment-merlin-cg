@@ -18,14 +18,14 @@ NGLScene::NGLScene(QWidget *_parent) :QOpenGLWidget(_parent)
 
 NGLScene::~NGLScene()
 {
-  std::cout<<"Shutting down NGL, removing VAO's and Shaders\n";
+  //std::cout<<"Shutting down NGL, removing VAO's and Shaders\n";
 }
 
 void NGLScene::resizeGL(int _w , int _h)
 {
   m_win.width  = static_cast<int>( _w * devicePixelRatio() );
   m_win.height = static_cast<int>( _h * devicePixelRatio() );
-  m_project=ngl::perspective(45.0f, float(m_win.width)/float(m_win.height), 0.001f,200.0f);
+  m_project=ngl::perspective(45.0f, float(m_win.width)/float(m_win.height), 0.001f,10000.0f);
 }
 
 
@@ -43,7 +43,7 @@ void NGLScene::initializeGL()
   ngl::VAOPrimitives::createLineGrid("floor",100,100,50);
   m_emitter=std::make_unique<Emitter>(10000,10000,800,ngl::Vec3(0,0,0));
 
-  m_plane = std::make_unique<Plane>(250, 250, 0.25f);
+  m_plane = std::make_unique<Plane>(300, 300, 1.0f);
 
   //m_plane->applyPerlinNoise(0.1f, 10.0f); // scale, amplitude
   ngl::ShaderLib::loadShader("ColourShader","shaders/ColourVertex.glsl","shaders/ColourFragment.glsl");
@@ -52,7 +52,7 @@ void NGLScene::initializeGL()
 
 
   //ngl::ShaderLib::use("HeightColourShader");
-  m_view = ngl::lookAt({0,40,80},{0,0,0},{0,1,0});
+  m_view = ngl::lookAt({150.0f, 100.0f, 450.0f}, {150.0f, 0.0f, 150.0f}, {0.0f, 1.0f, 0.0f});
   m_previousTime=std::chrono::steady_clock::now();
 
   // m_text = std::make_unique<ngl::Text>("fonts/DejaVuSansMono.ttf",16);
@@ -126,34 +126,26 @@ void NGLScene::keyReleaseEvent(QKeyEvent *_event)
 
 void NGLScene::keyPressEvent(QKeyEvent *_event)
 {
-    std::cout << "NGLScene::keyPressEvent called. Key: " << _event->key() << std::endl; // <-- ADD THIS LINE
+    //std::cout << "NGLScene::keyPressEvent called. Key: " << _event->key() << std::endl; // <-- ADD THIS LINE
 
     // ... rest of your keyPressEvent logic ...
     switch (_event->key())
     {
         // ... (your other existing key cases like Key_W, Key_S, etc.) ...
 
-  /*  case Qt::Key_E :
+   case Qt::Key_E :
         if (m_plane)
         {
-            std::cout << "E key pressed - applying hydraulic erosion with progressive updates." << std::endl;
+            //std::cout << "E key pressed - applying hydraulic erosion with progressive updates." << std::endl;
 
             makeCurrent(); // Make the OpenGL context current for this thread
 
             // Call applyHydraulicErosion on the plane, passing a lambda function as the callback.
-            m_plane->applyHydraulicErosion([this]() {
-                makeCurrent(); // Make context current for this specific progressive update step
-                if (m_plane) {
-                    m_plane->refreshGPUAssets(); // Tell the plane to update its GPU assets
-                }
-                this->update(); // Schedule a repaint
-                QCoreApplication::processEvents(); // Process events, including the repaint
-                doneCurrent(); // Release context for this step
-            });
+            m_plane->applyHydraulicErosion(20000, 30);
             // applyHydraulicErosion (the CPU part) has now finished.
             // m_heightGrid in m_plane is in its final state.
             // Now, explicitly update the GPU assets for the final state from NGLScene.
-            std::cout << "Erosion CPU work finished. Performing final GPU update for display." << std::endl;
+            //std::cout << "Erosion CPU work finished. Performing final GPU update for display." << std::endl;
             makeCurrent(); // Establish context for the FINAL GPU update
             if (m_plane) {
                 m_plane->refreshGPUAssets(); // Tell the plane to update its VAO with the final terrain data
@@ -161,7 +153,7 @@ void NGLScene::keyPressEvent(QKeyEvent *_event)
             doneCurrent(); // Release context for the FINAL GPU update
 
         }
-   */     break;
+        break;
 
           case Qt::Key_L :
 
@@ -179,7 +171,7 @@ void NGLScene::keyPressEvent(QKeyEvent *_event)
 
 void NGLScene::process_keys()
 {
-  //std::cout<<"Set Size " << m_keysPressed.size()<<"\n";
+  ////std::cout<<"Set Size " << m_keysPressed.size()<<"\n";
   float dx=0.0f;
   float dy=0.0f;
   float dz=0.0f;
@@ -203,7 +195,7 @@ void NGLScene::timerEvent(QTimerEvent *_event)
   auto now = std::chrono::steady_clock::now();
   auto delta = std::chrono::duration<float,std::chrono::seconds::period>(now-m_previousTime);
   m_previousTime=now;
-  //std::cout<<"time delta" << delta.count()<<'\n';
+  ////std::cout<<"time delta" << delta.count()<<'\n';
   if(m_animate)
   {
     process_keys();

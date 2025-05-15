@@ -78,7 +78,7 @@ void Emitter::drawTrailPoints(const std::vector<ngl::Vec4> &_points) const
     m_vao->setNumIndices(_points.size());
 
     glEnable(GL_PROGRAM_POINT_SIZE);
-    glPointSize(3.0f);
+    glPointSize(1.0f);
     m_vao->draw();
     glDisable(GL_PROGRAM_POINT_SIZE);
     m_vao->unbind();

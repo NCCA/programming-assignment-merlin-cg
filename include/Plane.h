@@ -50,7 +50,9 @@ private:
     void applyPerlinNoiseToGrid();
     void buildTriangleMeshFromGrid(const std::vector<ngl::Vec3>& noisyGridVertices);
     void setupTerrainVAO();
-
+    void smoothTerrain(float);
+    void computeAreaOfInfluence(float radius);
+    void updateDropVisualisation(bool toggle);
     unsigned int m_width;
     unsigned int m_depth;
     std::vector<ngl::Vec3> m_verticesRaw; // grid vertices
@@ -59,13 +61,16 @@ private:
     std::vector<ngl::Vec3> m_heightGrid;
     float m_spacing;
     std::unique_ptr<ngl::MultiBufferVAO> m_vao;
-    float m_noiseFrequency = 2.0f;
-    int m_noiseOctaves = 7;
+    float m_noiseFrequency = 1.0f;
+    int m_noiseOctaves = 10;
     int m_maxHeight = 30;
 
     // EROSION
     HeightAndGradientData getHeightAndGradient(float worldX, float worldZ) const;
     std::vector<ngl::Vec4> m_dropletTrailPoints;
+    std::vector<std::vector<int>> m_brushIndices;
+    std::vector<std::vector<float>> m_brushWeights;
+
 
     struct Droplet {
         ngl::Vec2 pos;          // Current 2D position (world coordinates)
@@ -98,13 +103,13 @@ private:
     float m_sedimentCapacityFactor = 4.0f; // Multiplier for sediment capacity
     float m_minSedimentCapacity = 0.01f;  // A small minimum capacity
     float m_erosionRate = 0.3f;         // Factor for how much is eroded
-    float m_depositionRate = 0.4f;      // Factor for how much is deposited
-    float m_evaporationRate = 0.01f;    // Water lost per step
-    float m_gravity = 6.0f;             // Affects particle acceleration/speed
+    float m_depositionRate = 0.06f;      // Factor for how much is deposited
+    float m_evaporationRate = 0.1f;    // Water lost per step
+    float m_gravity = 4.0f;             // Affects particle acceleration/speed
     float m_initialWaterAmount = 1.0f;  // Starting water for a droplet
-    float m_initialSpeed = 10.0f;        // Starting speed for a droplet
-    float m_erosionRadius = 0.3f;       // Radius over which erosion is appliede
-    float m_depositionRadius = 1.0f;    // Radius over which deposition is applied
+    float m_initialSpeed = 1.0f;        // Starting speed for a droplet
+    int m_erosionRadius = 3;       // Radius over which erosion is appliede
+    float m_depositionRadius = 3.0;    // Radius over which deposition is applied
     float m_maxErosionDepthFactor = 0.5f; // Limits erosion per step relative to deltaHeight
     float m_friction = 0.0f;
 };

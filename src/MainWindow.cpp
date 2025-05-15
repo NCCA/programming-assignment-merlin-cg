@@ -7,6 +7,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     m_ui->setupUi(this);
     m_gl = new NGLScene(this);
+
     m_ui->m_MainWindowgridLayout->addWidget(m_gl,0,0,2,1);
     connect(m_ui->freqSpinBox,SIGNAL(valueChanged(double)),
             m_gl,SLOT(setSpread(double)));

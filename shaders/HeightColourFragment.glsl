@@ -8,7 +8,7 @@ layout (location=0) out vec4 fragColour;
 void main()
 {
     float minTerrainHeight = 0.0;
-    float maxTerrainHeight = 40.0;
+    float maxTerrainHeight = 80.0;
 
     float normalizedHeight = clamp((outHeight - minTerrainHeight) / (maxTerrainHeight - minTerrainHeight), 0.0, 1.0);
 
