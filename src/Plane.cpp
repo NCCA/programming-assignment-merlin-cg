@@ -143,8 +143,8 @@ void Plane::applyHydraulicErosion(int numDroplets, int dropletMaxLifetime /*, ..
 {
     if (m_heightGrid.empty()) { /* ... error handling ... */ return; }
     computeAreaOfInfluence(m_erosionRadius);
-    m_dropletTrailPoints.clear(); // Clear previous trails before starting a new simulation
-    m_dropletTrailPoints.reserve(numDroplets * dropletMaxLifetime);
+   // m_dropletTrailPoints.clear(); // Clear previous trails before starting a new simulation
+   // m_dropletTrailPoints.reserve(numDroplets * dropletMaxLifetime);
 
 
     for (int i = 0; i < numDroplets; ++i) {
@@ -181,10 +181,10 @@ void Plane::applyHydraulicErosion(int numDroplets, int dropletMaxLifetime /*, ..
             droplet.pos.m_x += droplet.dir.m_x;
             droplet.pos.m_y += droplet.dir.m_y;
 
-           // m_dropletTrailPoints.push_back(ngl::Vec4(droplet.pos.m_x, originalTerrainHeight, droplet.pos.m_y, static_cast<float>(droplet.lifetime)));
+            m_dropletTrailPoints.push_back(ngl::Vec4(droplet.pos.m_x, originalTerrainHeight, droplet.pos.m_y, static_cast<float>(droplet.lifetime)));
 
             droplet.lifetime--;
-            if (droplet.lifetime <= 0 /* || droplet.water <= 0.001f */ ) { // Add water check if you have evaporation
+            if (droplet.lifetime <= 0 || droplet.water <= 0.1f ) {
                 break; // End this droplet's simulation
             }
             // If droplet moves off map, also break
@@ -269,7 +269,7 @@ void Plane::applyHydraulicErosion(int numDroplets, int dropletMaxLifetime /*, ..
                 currentCellGridZ = std::max(0, std::min(currentCellGridZ, (int)m_depth - 1));
                 int brushAccessIndex = currentCellGridZ * m_width + currentCellGridX;
 
-                if (brushAccessIndex >= 0 && brushAccessIndex < m_brushIndices.size()) { // Check bounds
+                if (brushAccessIndex >= 0 && brushAccessIndex <= m_brushIndices.size()) { // Check bounds
                     const std::vector<int>& indices = m_brushIndices[brushAccessIndex];
                     const std::vector<float>& weights = m_brushWeights[brushAccessIndex];
                     for (size_t i = 0; i < indices.size(); i++) {
@@ -480,7 +480,7 @@ void Plane::generate()
     clearTerrainData();
 
     createBaseGridVertices();
-
+    m_dropletTrailPoints.clear();
     applyPerlinNoiseToGrid();
 
 

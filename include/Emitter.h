@@ -23,6 +23,8 @@ public :
     void move(float _dx, float _dy, float _dz);
     void setSpread(float _value);
     void drawTrailPoints(const std::vector<ngl::Vec4> &_points) const;
+    void setShowTrailPoints(bool _show) { m_showTrailPoints = _show; }
+    bool isShowingTrailPoints() const { return m_showTrailPoints; }
 
 public slots:
     void setNumPerFrame(int _value){m_numPerFrame=_value;}

@@ -44,6 +44,7 @@ void NGLScene::initializeGL()
   m_emitter=std::make_unique<Emitter>(10000,10000,800,ngl::Vec3(0,0,0));
 
   m_plane = std::make_unique<Plane>(300, 300, 1.0f);
+  //m_emitter->setShowTrailPoints(false);
 
   //m_plane->applyPerlinNoise(0.1f, 10.0f); // scale, amplitude
   ngl::ShaderLib::loadShader("ColourShader","shaders/ColourVertex.glsl","shaders/ColourFragment.glsl");
@@ -163,7 +164,10 @@ void NGLScene::keyPressEvent(QKeyEvent *_event)
                   update();
                   break;
         }
-
+          case Qt::Key_T:
+              m_emitter->setShowTrailPoints(!m_emitter->isShowingTrailPoints());
+              update();
+              break;
     default :
         break;
     }

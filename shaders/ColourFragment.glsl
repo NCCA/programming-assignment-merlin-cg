@@ -1,5 +1,5 @@
 #version 330 core
-in vec3 vertColour;
+in vec4 vertColour;
 layout (location=0)out vec4 outColour;
 void main ()
 {
@@ -11,5 +11,5 @@ void main ()
     if (dist > 0.5)
         discard;
 
- outColour = vec4(vertColour,1);
+outColour = vertColour;
 }
