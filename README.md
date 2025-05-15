@@ -31,3 +31,14 @@ Visualised the droplet simulation, just need to implement sediment erosion and d
 ![image](https://github.com/user-attachments/assets/2fb6b1c4-df21-4d7a-bfe2-fa17dcf5c523)
 Before erosion vs After (60,000 droplets)
 ![image](https://github.com/user-attachments/assets/c88e3eb1-f9b6-4e23-9254-c05388783a32)
+a
+![image](https://github.com/user-attachments/assets/53ca2209-a1e3-4ce5-855c-c18be3e1ca36)
+b
+![image](https://github.com/user-attachments/assets/67506bf6-6e21-4120-aa27-a4ba704f5d58)
+c
+![image](https://github.com/user-attachments/assets/30562422-bf93-496a-9cb7-0e3a4e85cfc3)
+d
+![image](https://github.com/user-attachments/assets/184b0d1a-5e41-4898-9798-0c4e3de05720)
+e
+![image](https://github.com/user-attachments/assets/29075580-eec0-4aa5-a0e2-4ad942ba1665)
+
