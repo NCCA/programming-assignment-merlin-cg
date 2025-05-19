@@ -56,7 +56,7 @@ class NGLScene : public QOpenGLWidget
     void updateGridWidth(int width);
     void updateGridDepth(int depth);
     void updateTerrainHeight(int height);
-
+    void callErosionEvent(int totalDroplets, int lifetime);
 
 
 public slots :

@@ -139,7 +139,7 @@ HeightAndGradientData Plane::getHeightAndGradient(float worldX, float worldZ) co
 }
 
 // In Plane.cpp (definition)
-void Plane::applyHydraulicErosion(int numDroplets, int dropletMaxLifetime /*, ... */)
+void Plane::applyHydraulicErosion(int numDroplets, int dropletMaxLifetime)
 {
     if (m_heightGrid.empty()) { /* ... error handling ... */ return; }
     computeAreaOfInfluence(m_erosionRadius);

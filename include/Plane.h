@@ -61,9 +61,9 @@ private:
     std::vector<ngl::Vec3> m_heightGrid;
     float m_spacing;
     std::unique_ptr<ngl::MultiBufferVAO> m_vao;
-    float m_noiseFrequency = 1.0f;
-    int m_noiseOctaves = 10;
-    int m_maxHeight = 30;
+    float m_noiseFrequency = 3.0f;
+    int m_noiseOctaves = 6;
+    int m_maxHeight = 90;
 
     // EROSION
     HeightAndGradientData getHeightAndGradient(float worldX, float worldZ) const;

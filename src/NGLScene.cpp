@@ -57,7 +57,7 @@ void NGLScene::initializeGL()
   m_previousTime=std::chrono::steady_clock::now();
   //ngl::ShaderLib::setUniform("maxTerrainHeight", m_plane->getTerrainHeight());
 
-  // m_text = std::make_unique<ngl::Text>("fonts/DejaVuSansMono.ttf",16);
+   //m_text = std::make_unique<ngl::Text>("fonts/DejaVuSansMono.ttf",16);
   // m_text->setScreenSize(width(),height());
   // m_text->setColour(1,1,1);
   startTimer(10);
@@ -139,26 +139,17 @@ void NGLScene::keyPressEvent(QKeyEvent *_event)
    case Qt::Key_E :
         if (m_plane)
         {
-            //std::cout << "E key pressed - applying hydraulic erosion with progressive updates." << std::endl;
 
-            makeCurrent(); // Make the OpenGL context current for this thread
-
-            // Call applyHydraulicErosion on the plane, passing a lambda function as the callback.
+            makeCurrent();
             m_plane->applyHydraulicErosion(20000, 30);
-            // applyHydraulicErosion (the CPU part) has now finished.
-            // m_heightGrid in m_plane is in its final state.
-            // Now, explicitly update the GPU assets for the final state from NGLScene.
-            //std::cout << "Erosion CPU work finished. Performing final GPU update for display." << std::endl;
-            makeCurrent(); // Establish context for the FINAL GPU update
-            if (m_plane) {
+            makeCurrent();
                 m_plane->refreshGPUAssets(); // Tell the plane to update its VAO with the final terrain data
-            }
             doneCurrent(); // Release context for the FINAL GPU update
 
         }
         break;
 
-          case Qt::Key_R :
+          case Qt::Key_W :
 
         if (m_plane)
         {
@@ -166,7 +157,7 @@ void NGLScene::keyPressEvent(QKeyEvent *_event)
                   update();
                   break;
         }
-          case Qt::Key_T:
+          case Qt::Key_V:
               m_emitter->setShowTrailPoints(!m_emitter->isShowingTrailPoints());
               update();
               break;
@@ -277,5 +268,17 @@ void NGLScene::updateTerrainHeight(int height)
     }
 }
 
+void NGLScene::callErosionEvent(int maxDroplets, int lifetime)
+{
+    if (m_plane)
+    {
+        std::cout << "Erosion droplets " << maxDroplets << std::endl;
+        std::cout << "Droplet Lifetime " << lifetime << std::endl;
 
 
+        makeCurrent();
+        m_plane->applyHydraulicErosion(maxDroplets, lifetime);
+        makeCurrent();
+        m_plane->refreshGPUAssets();
+    }
+}
