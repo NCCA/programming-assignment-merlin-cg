@@ -84,12 +84,6 @@ HeightAndGradientData Plane::getHeightAndGradient(float worldX, float worldZ) co
 {
     HeightAndGradientData result;
 
-    if (m_heightGrid.empty() || m_spacing == 0.0f || m_width == 0 || m_depth == 0) {
-        // Optional: Log an error or handle as appropriate
-        // std::cerr << "Error: Cannot calculate height/gradient. Invalid grid state." << std::endl;
-        return result; // Return default (zeroed) data
-    }
-
     float gridFloatX = worldX / m_spacing;
     float gridFloatZ = worldZ / m_spacing;
 
@@ -100,20 +94,18 @@ HeightAndGradientData Plane::getHeightAndGradient(float worldX, float worldZ) co
     float offsetX = gridFloatX - coordX;
     float offsetZ = gridFloatZ - coordZ;
 
-    // Define and clamp coordinates for the four cell corners for safe array access
+    // Define and clamp coordinates for the four cell corners
     int x0 = coordX;
     int z0 = coordZ;
     int x1 = coordX + 1;
     int z1 = coordZ + 1;
-
-    // clamping to prevent out-of-bounds access
     int c_x0 = std::clamp(x0, 0, static_cast<int>(m_width) - 1);
     int c_z0 = std::clamp(z0, 0, static_cast<int>(m_depth) - 1);
     int c_x1 = std::clamp(x1, 0, static_cast<int>(m_width) - 1);
     int c_z1 = std::clamp(z1, 0, static_cast<int>(m_depth) - 1);
 
     // Calculate heights of the four nodes of the droplet's cell
-    // Assumes m_heightGrid is 1D: index = z * m_width + x
+    // index = z * m_width + x
     float hNW = m_heightGrid[c_z0 * m_width + c_x0].m_y;
     float hNE = m_heightGrid[c_z0 * m_width + c_x1].m_y;
     float hSW = m_heightGrid[c_z1 * m_width + c_x0].m_y;
@@ -128,19 +120,15 @@ HeightAndGradientData Plane::getHeightAndGradient(float worldX, float worldZ) co
     float height_lerp_bottom = hNW * (1.0f - offsetX) + hNE * offsetX;
     float height_lerp_top    = hSW * (1.0f - offsetX) + hSE * offsetX;
     result.height = height_lerp_bottom * (1.0f - offsetZ) + height_lerp_top * offsetZ;
-
-    // Alternative for height interpolation (matches your C# example more directly):
-    // result.height = hNW * (1.0f - offsetX) * (1.0f - offsetZ) +
-    //                 hNE * offsetX * (1.0f - offsetZ) +
-    //                 hSW * (1.0f - offsetX) * offsetZ +
-    //                 hSE * offsetX * offsetZ;
-
+    
     return result;
+
 }
 
-// In Plane.cpp (definition)
+// Inspired by Sebastian Lague's hydraulic erosion implementation
 void Plane::applyHydraulicErosion(int numDroplets, int dropletMaxLifetime)
 {
+
     if (m_heightGrid.empty()) { /* ... error handling ... */ return; }
     computeAreaOfInfluence(m_erosionRadius);
    // m_dropletTrailPoints.clear(); // Clear previous trails before starting a new simulation
@@ -159,15 +147,9 @@ void Plane::applyHydraulicErosion(int numDroplets, int dropletMaxLifetime)
 
         for (int step = 0; step < dropletMaxLifetime; ++step)
         {
+
             HeightAndGradientData hgDataOld = getHeightAndGradient(droplet.pos.m_x, droplet.pos.m_y);
             float originalTerrainHeight = hgDataOld.height;
-
-            // Record current position
-            //std::cout << "S[" << step << "] --- Start of Step ---" << std::endl;
-            //std::cout << "S[" << step << "] Pos: (" << droplet.pos.m_x << ", " << droplet.pos.m_y << ")" << std::endl;
-            //std::cout << "S[" << step << "] Dir: (" << droplet.dir.m_x << ", " << droplet.dir.m_y << ")" << std::endl;
-            //std::cout << "S[" << step << "] Speed: " << droplet.speed << ", Water: " << droplet.water << ", Sediment: " << droplet.sediment << std::endl;
-            //std::cout << "S[" << step << "] OldHeight: " << originalTerrainHeight << std::endl;
 
             droplet.dir.m_x = (droplet.dir.m_x * m_inertiaFactor - hgDataOld.rawGradientAscent.m_x * (1 - m_inertiaFactor));
             droplet.dir.m_y = (droplet.dir.m_y * m_inertiaFactor - hgDataOld.rawGradientAscent.m_y * (1 - m_inertiaFactor));
@@ -236,6 +218,7 @@ void Plane::applyHydraulicErosion(int numDroplets, int dropletMaxLifetime)
 
                 if (nodeX >= 0 && nodeX < m_width - 1 && nodeZ >= 0 && nodeZ < m_depth - 1)
                 {
+
                     int indexNW = nodeZ * m_width + nodeX;
                     int indexNE = indexNW + 1;
                     int indexSW = indexNW + m_width;
@@ -250,8 +233,6 @@ void Plane::applyHydraulicErosion(int numDroplets, int dropletMaxLifetime)
                     m_heightGrid[indexNE].m_y += depositNE;
                     m_heightGrid[indexSW].m_y += depositSW;
                     m_heightGrid[indexSE].m_y += depositSE;
-
-
 
                 }
 

@@ -18,8 +18,9 @@ NGLScene::NGLScene(QWidget *_parent) :QOpenGLWidget(_parent)
 
 NGLScene::~NGLScene()
 {
-  //std::cout<<"Shutting down NGL, removing VAO's and Shaders\n";
+    //std::cout<<"Shutting down NGL, removing VAO's and Shaders\n";
 }
+
 
 void NGLScene::resizeGL(int _w , int _h)
 {
@@ -44,18 +45,13 @@ void NGLScene::initializeGL()
   m_emitter=std::make_unique<Emitter>(10000,10000,800,ngl::Vec3(0,0,0));
 
   m_plane = std::make_unique<Plane>(300, 300, 1.0f);
-  //m_emitter->setShowTrailPoints(false);
 
-  //m_plane->applyPerlinNoise(0.1f, 10.0f); // scale, amplitude
   ngl::ShaderLib::loadShader("ColourShader","shaders/ColourVertex.glsl","shaders/ColourFragment.glsl");
   ngl::ShaderLib::loadShader("HeightColourShader","shaders/HeightColourVertex.glsl","shaders/HeightColourFragment.glsl");
-  //ngl::ShaderLib::loadShader("WireframeShader","shaders/WireframeFragment.glsl","shaders/WireFrameVertex.glsl");
 
 
-  //ngl::ShaderLib::use("HeightColourShader");
   m_view = ngl::lookAt({150.0f, 100.0f, 450.0f}, {150.0f, 0.0f, 150.0f}, {0.0f, 1.0f, 0.0f});
   m_previousTime=std::chrono::steady_clock::now();
-  //ngl::ShaderLib::setUniform("maxTerrainHeight", m_plane->getTerrainHeight());
 
    //m_text = std::make_unique<ngl::Text>("fonts/DejaVuSansMono.ttf",16);
   // m_text->setScreenSize(width(),height());
@@ -67,7 +63,7 @@ void NGLScene::initializeGL()
 void NGLScene::paintGL()
 {
   // clear the screen and depth buffer
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
   glViewport(0,0,m_win.width,m_win.height);
   auto rotX = ngl::Mat4::rotateX(m_win.spinXFace);
   auto rotY = ngl::Mat4::rotateY(m_win.spinYFace);
@@ -79,10 +75,7 @@ void NGLScene::paintGL()
   ngl::ShaderLib::setUniform("MVP",m_project*m_view*mouseRotation);
   ngl::ShaderLib::setUniform("maxTerrainHeight", m_plane->getTerrainHeight());
 
- // m_emitter->render();
-
- // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-  //makeCurrent();
+ // Wireframe switch
   glPolygonMode(GL_FRONT_AND_BACK, m_wireframeMode ? GL_LINE : GL_FILL);
   m_plane->render();
 

@@ -23,6 +23,7 @@ target_sources(${TargetName} PRIVATE
         src/Plane.cpp
         src/NGLScene.cpp
         src/NGLSceneMouseControls.cpp
+        src/HydraulicErosion.cpp
         include/Emitter.h
         include/MainWindow.h
         include/NGLScene.h
@@ -30,6 +31,7 @@ target_sources(${TargetName} PRIVATE
         include/WindowParams.h
         include/PerlinNoise.hpp
         include/Plane.h
+        include/HydraulicErosion.h
         ui/MainWindow.ui
         shaders/ParticleFragment.glsl
         shaders/ParticleVertex.glsl
