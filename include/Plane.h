@@ -8,11 +8,12 @@
 #include <ngl/MultiBufferVAO.h>
 #include <functional>
 #include <ngl/Vec2.h>
+#include "HydraulicErosion.h"
 
-struct HeightAndGradientData {
-    float height = 0.0f;
-    ngl::Vec2 rawGradientAscent{0.0f, 0.0f}; // Gradient components pointing towards steepest ASCENT
-};
+// struct HeightAndGradientData {
+//     float height = 0.0f;
+//     ngl::Vec2 rawGradientAscent{0.0f, 0.0f}; // Gradient components pointing towards steepest ASCENT
+// };
 
 
 class Plane
@@ -22,12 +23,11 @@ public:
     void generate();
     void regenerate();
     void render() const;
+
     void setWidth(int width) {m_width = width; }
     int getWidth() const { return m_width; }
-
     void setDepth(int depth) {m_depth = depth; }
     int getDepth() const { return m_depth; }
-
     void applyPerlinNoise(float scale, float amplitude);
     void setNoiseFrequency(float freq) { m_noiseFrequency = freq; }
     float getNoiseFrequency() const { return m_noiseFrequency; }
@@ -66,7 +66,7 @@ private:
     int m_maxHeight = 90;
 
     // EROSION
-    HeightAndGradientData getHeightAndGradient(float worldX, float worldZ) const;
+    //HeightAndGradientData getHeightAndGradient(float worldX, float worldZ) const;
     std::vector<ngl::Vec4> m_dropletTrailPoints;
     std::vector<std::vector<int>> m_brushIndices;
     std::vector<std::vector<float>> m_brushWeights;
@@ -86,22 +86,8 @@ private:
             water(initialWater), sediment(0.0f), lifetime(maxLifetime) {}
     };
 
-    int m_erosionIterations = 15000; // Default
-    int m_numDropletsPerIteration = 70; // Default
-    int m_dropletLifetime = 30;         // Max steps for a droplet
-    float m_inertiaFactor = 0.05f;      // How much previous direction is maintained (0-1)
-    float m_sedimentCapacityFactor = 4.0f; // Multiplier for sediment capacity
-    float m_minSedimentCapacity = 0.01f;  // A small minimum capacity
-    float m_erosionRate = 0.2f;         // Factor for how much is eroded
-    float m_depositionRate = 0.1f;      // Factor for how much is deposited
-    float m_evaporationRate = 0.1f;    // Water lost per step
-    float m_gravity = 4.0f;             // Affects particle acceleration/speed
-    float m_initialWaterAmount = 1.0f;  // Starting water for a droplet
-    float m_initialSpeed = 1.0f;        // Starting speed for a droplet
-    int m_erosionRadius = 3;       // Radius over which erosion is appliede
-    float m_depositionRadius = 3.0;    // Radius over which deposition is applied
-    float m_maxErosionDepthFactor = 0.5f; // Limits erosion per step relative to deltaHeight
-    float m_friction = 0.0f;
+
+    HydraulicErosion m_erosion;
 };
 
 #endif // PLANE_H

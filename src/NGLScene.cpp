@@ -46,8 +46,8 @@ void NGLScene::initializeGL()
 
   m_plane = std::make_unique<Plane>(300, 300, 1.0f);
 
-  ngl::ShaderLib::loadShader("ColourShader","shaders/ColourVertex.glsl","shaders/ColourFragment.glsl");
   ngl::ShaderLib::loadShader("HeightColourShader","shaders/HeightColourVertex.glsl","shaders/HeightColourFragment.glsl");
+    ngl::ShaderLib::loadShader("ColourShader","shaders/ColourVertex.glsl","shaders/ColourFragment.glsl");
 
 
   m_view = ngl::lookAt({150.0f, 100.0f, 450.0f}, {150.0f, 0.0f, 150.0f}, {0.0f, 1.0f, 0.0f});
