@@ -45,7 +45,6 @@ public:
 
     }
 
-
     //Erosion
     void applyHydraulicErosion(int numDroplets, int dropletMaxLifetime /*, other params */);
     // Delegate access to droplet trailpoitns

@@ -9,14 +9,14 @@
 #include <memory>
 #include <QObject>
 
-class Emitter : public QObject
+class DropletVisualize : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(int m_numPerFrame WRITE setNumPerFrame);
 
 
 public :
-        Emitter(size_t _num,size_t _maxAlive, int _numPerFrame,ngl::Vec3 _pos);
+        DropletVisualize(size_t _num,size_t _maxAlive, int _numPerFrame,ngl::Vec3 _pos);
     size_t size() const;
     void update(float _dt);
     void render() const;

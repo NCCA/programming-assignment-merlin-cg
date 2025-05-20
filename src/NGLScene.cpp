@@ -43,7 +43,7 @@ void NGLScene::initializeGL()
   glEnable(GL_MULTISAMPLE);
   ngl::VAOPrimitives::createSphere("sphere",1.0f,20);
   ngl::VAOPrimitives::createLineGrid("floor",100,100,50);
-  m_emitter=std::make_unique<Emitter>(10000,10000,800,ngl::Vec3(0,0,0));
+  m_emitter=std::make_unique<DropletVisualize>(10000,10000,800,ngl::Vec3(0,0,0));
 
   m_plane = std::make_unique<Plane>(300, 300, 1.0f);
 
@@ -123,9 +123,7 @@ void NGLScene::keyReleaseEvent(QKeyEvent *_event)
 
 void NGLScene::keyPressEvent(QKeyEvent *_event)
 {
-    //std::cout << "NGLScene::keyPressEvent called. Key: " << _event->key() << std::endl; // <-- ADD THIS LINE
 
-    // ... rest of your keyPressEvent logic ...
     switch (_event->key())
     {
         // ... (your other existing key cases like Key_W, Key_S, etc.) ...
@@ -281,9 +279,19 @@ void NGLScene::callErosionEvent(int maxDroplets, int lifetime)
         std::cout << "Droplet Lifetime " << lifetime << std::endl;
 
 
-        makeCurrent();
-        m_plane->applyHydraulicErosion(maxDroplets, lifetime);
-        makeCurrent();
-        m_plane->refreshGPUAssets();
+        const int dropletsPerUpdate = 1000;
+        const int iterations = maxDroplets / dropletsPerUpdate; // 40 iterations
+
+        for (int i = 0; i < iterations; i++)
+        {
+            m_plane->applyHydraulicErosion(dropletsPerUpdate, 30);
+            makeCurrent();
+            m_plane->refreshGPUAssets();
+
+            update();
+            QApplication::processEvents();
+
+        }
+        doneCurrent(); // Release context for the FINAL GPU update
     }
 }

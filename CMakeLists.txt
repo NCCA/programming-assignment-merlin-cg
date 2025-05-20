@@ -19,13 +19,13 @@ target_sources(${TargetName} PRIVATE
         src/main.cpp
         src/MainWindow.cpp
         src/NGLScene.cpp
-        src/Emitter.cpp
+        src/DropletVisualize.cpp
         src/Plane.cpp
         src/NGLScene.cpp
         src/NGLSceneMouseControls.cpp
         src/HydraulicErosion.cpp
         src/PerlinNoiseGenerator.cpp
-        include/Emitter.h
+        include/DropletVisualize.h
         include/MainWindow.h
         include/NGLScene.h
         include/MainWindow.h

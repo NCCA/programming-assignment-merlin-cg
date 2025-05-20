@@ -1,4 +1,4 @@
-#include "Emitter.h"
+#include "DropletVisualize.h"
 #include <iostream>
 #include <ngl/Random.h>
 #include <algorithm>
@@ -12,7 +12,7 @@
 #include <algorithm>
 
 
-Emitter::Emitter(size_t _num, size_t _maxAlive, int _numPerFrame, ngl::Vec3 _pos) :
+DropletVisualize::DropletVisualize(size_t _num, size_t _maxAlive, int _numPerFrame, ngl::Vec3 _pos) :
 m_maxParticles{_num}, m_maxAlive{_maxAlive}, m_numPerFrame{_numPerFrame},m_pos{_pos}
 {
 
@@ -26,17 +26,17 @@ m_maxParticles{_num}, m_maxAlive{_maxAlive}, m_numPerFrame{_numPerFrame},m_pos{_
     m_vao->unbind();
 }
 
-size_t Emitter::size() const
+size_t DropletVisualize::size() const
 {
   return m_maxParticles;
 }
 
-void Emitter::birthParticles()
+void DropletVisualize::birthParticles()
 {
 
 }
 
-void Emitter::update(float _dt)
+void DropletVisualize::update(float _dt)
 {
 
     birthParticles();
@@ -44,7 +44,7 @@ void Emitter::update(float _dt)
 
 }
 
-void Emitter::drawTrailPoints(const std::vector<ngl::Vec4> &_points) const
+void DropletVisualize::drawTrailPoints(const std::vector<ngl::Vec4> &_points) const
 {
     if (!_points.empty() && m_showTrailPoints == false)
         return;
@@ -86,13 +86,13 @@ void Emitter::drawTrailPoints(const std::vector<ngl::Vec4> &_points) const
     m_vao->unbind();
 }
 
-void Emitter::resetParticle(size_t _i)
+void DropletVisualize::resetParticle(size_t _i)
 {
 
 }
 
 
-ngl::Vec3 Emitter::randomVectorOnSphere(float _radius)
+ngl::Vec3 DropletVisualize::randomVectorOnSphere(float _radius)
 {
   auto phi = ngl::Random::randomPositiveNumber(M_PI * 2.0f);
   auto costheta = ngl::Random::randomNumber();
@@ -104,7 +104,7 @@ ngl::Vec3 Emitter::randomVectorOnSphere(float _radius)
                    r * std::cos(theta));
 }
 
-void Emitter::render() const
+void DropletVisualize::render() const
 {
   m_vao->bind();
   m_vao->setData(0,ngl::MultiBufferVAO::VertexData(
@@ -128,14 +128,14 @@ void Emitter::render() const
 
 }
 
-void Emitter::move(float _dx, float _dy, float _dz)
+void DropletVisualize::move(float _dx, float _dy, float _dz)
 {
   m_pos.m_x +=_dx;
   m_pos.m_y +=_dy;
   m_pos.m_z +=_dz;
 }
 
-void Emitter::setSpread(float _value)
+void DropletVisualize::setSpread(float _value)
 {
     m_spread = _value;
 }

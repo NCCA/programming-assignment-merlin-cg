@@ -14,7 +14,7 @@
 #include "PerlinNoise.hpp"
 #include <random>
 #include <ngl/Vec2.h>
-#include "Emitter.h"
+#include "DropletVisualize.h"
 #include "PerlinNoiseGenerator.h"
 
 static bool s_isFirstGeneration = true;
