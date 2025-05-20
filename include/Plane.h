@@ -10,6 +10,12 @@
 #include "TerrainGenerator.h"
 #include "PerlinNoiseGenerator.h"
 
+/**
+ * Manages terrain mesh generation and rendering
+ * Handles the creation, modification, and rendering of a 3D terrain mesh.
+ * Uses the Strategy pattern for terrain generation and delegates erosion to HydraulicErosion.
+ */
+
 class Plane
 {
 public:
@@ -31,30 +37,35 @@ public:
     void setTerrainHeight(int height) { m_maxHeight = height; }
     int getTerrainHeight() const { return m_maxHeight; }
 
+    /**
+ * Updates noise frequency and propagates to terrain generator
+ * Changes take effect on next regenerate() call
+ */
     void setNoiseFrequency(float freq) {
         m_noiseFrequency = freq;
         auto perlinGen = std::dynamic_pointer_cast<PerlinNoiseGenerator>(m_terrainGenerator);
-        perlinGen->setFrequency(freq);
-
+        if(perlinGen) perlinGen->setFrequency(freq);
     }
 
+    /**
+ * Updates noise frequency and propagates to terrain generator
+ * Changes take effect on next regenerate() call
+ */
     void setNoiseOctaves(int oct) {
         m_noiseOctaves = oct;
         auto perlinGen = std::dynamic_pointer_cast<PerlinNoiseGenerator>(m_terrainGenerator);
-        perlinGen->setOctaves(oct);
-
+        if(perlinGen) perlinGen->setOctaves(oct);
     }
 
     //Erosion
     void applyHydraulicErosion(int numDroplets, int dropletMaxLifetime /*, other params */);
     // Delegate access to droplet trailpoitns
     const std::vector<ngl::Vec4>& getDropletTrailPoints() const { return m_erosion.getDropletTrailPoints(); }
-    //const HydraulicErosion& getErosion() const { return m_erosion; }
 private:
+
     // Helper methods for generation
     void clearTerrainData();
     void createBaseGridVertices();
-    void applyPerlinNoiseToGrid();
     void buildTriangleMeshFromGrid(const std::vector<ngl::Vec3>& noisyGridVertices);
     void setupTerrainVAO();
 

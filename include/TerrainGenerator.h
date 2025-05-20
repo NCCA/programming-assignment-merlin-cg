@@ -1,6 +1,6 @@
-//
-// Created by s5609424 on 20/05/25.
-//
+/*
+ *Interface for terrain generation strategies, currently only uses PerlinNoiseGenerator
+ */
 
 #ifndef TERRAINGENERATOR_H
 #define TERRAINGENERATOR_H

@@ -1,16 +1,18 @@
-//
-// Created by s5609424 on 20/05/25.
-//
+ /**
+ * Implements the TerrainGenerator interface to create natural-looking terrain
+* using Perlin noise algorithms with configurable frequency and octaves.
+*/
 
 #ifndef PERLINNOISEGENERATOR_H
 #define PERLINNOISEGENERATOR_H
 #include "TerrainGenerator.h"
 
+
 class PerlinNoiseGenerator : public TerrainGenerator {
 public:
     PerlinNoiseGenerator(float frequency = 3.0f, int octaves = 6, int maxHeight = 90);
 
-    void generateTerrain(std::vector<ngl::Vec3>& heightGrid, unsigned int width, unsigned int depth, float spacing, int m_maxHeight) override;
+    void generateTerrain(std::vector<ngl::Vec3>& heightGrid, unsigned int width, unsigned int depth, float spacing, int maxHeight) override;
 
 
 

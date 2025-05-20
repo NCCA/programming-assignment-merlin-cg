@@ -1,5 +1,6 @@
-#ifndef EMITTER_H_
-#define EMITTER_H_
+
+#ifndef DROPLET_VISUALIZE_H_
+#define DROPLET_VISUALIZE_H_
 #include <vector>
 #include <string_view>
 // #include "Particle.h"
@@ -9,6 +10,13 @@
 #include <memory>
 #include <QObject>
 
+/**
+* Provides visualization for water droplet movement
+ * Renders trail points to visualize the path and behavior
+ * of water droplets during the hydraulic erosion simulation.
+ */
+
+
 class DropletVisualize : public QObject
 {
     Q_OBJECT
@@ -16,36 +24,45 @@ class DropletVisualize : public QObject
 
 
 public :
-        DropletVisualize(size_t _num,size_t _maxAlive, int _numPerFrame,ngl::Vec3 _pos);
-    size_t size() const;
-    void update(float _dt);
-    void render() const;
-    void move(float _dx, float _dy, float _dz);
-    void setSpread(float _value);
+    /**
+ * Constructor for droplet visualization
+ * @param _num Maximum number of particles (only used for VAO initialization)
+ * @param _maxAlive Maximum number of active particles (unused in current implementation)
+ * @param _numPerFrame Number of particles to emit per frame (unused in current implementation)
+ * @param _pos Initial position (unused in current implementation)
+ */
+    DropletVisualize(size_t _num,size_t _maxAlive, int _numPerFrame,ngl::Vec3 _pos);
+
+    
+    /**
+     * Draw trail points for droplet visualization
+     * @param _points Vector of points to visualize (x,y,z,lifetime)
+     */
     void drawTrailPoints(const std::vector<ngl::Vec4> &_points) const;
+
+    /**
+     * Enable or disable trail point visualization
+     * @param _show Whether to show trail points
+     */
     void setShowTrailPoints(bool _show) { m_showTrailPoints = _show; }
+
+    /**
+     * Check if trail points are currently being shown
+     * @return True if trail points are visible
+     */
     bool isShowingTrailPoints() const { return m_showTrailPoints; }
 
 public slots:
     void setNumPerFrame(int _value){m_numPerFrame=_value;}
 
 private :
-        ngl::Vec3 m_pos;
-    std::vector<ngl::Vec4> m_ppos;
-    std::vector<ngl::Vec3> m_pdir;
-    std::vector<ngl::Vec3> m_pcolour;
-    std::vector<float> m_psize;
-    std::vector<int> m_plife;
-    enum class ParticleState : bool {Active,Dead};
-    std::vector<ParticleState> m_state;
-    size_t m_maxParticles;
-    size_t m_maxAlive = 1000;
-    int m_numPerFrame = 120;
-    void resetParticle(size_t _i);
-    void birthParticles();
-    ngl::Vec3 randomVectorOnSphere(float _radius = 1.0f);
     std::unique_ptr<ngl::MultiBufferVAO> m_vao;
-    float m_spread = 1.0;
     bool m_showTrailPoints = true;
+
+    // From old emitter code, might use later
+    size_t m_maxParticles;
+    int m_numPerFrame = 120;
+    ngl::Vec3 m_pos;
+    size_t m_maxAlive = 1000;
 };
 #endif

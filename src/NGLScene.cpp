@@ -186,7 +186,6 @@ void NGLScene::process_keys()
       case Qt::Key_Down : dz -=inc; break;
     }
   }
-m_emitter->move(dx,dy,dz);
 }
 
 void NGLScene::timerEvent(QTimerEvent *_event)
@@ -205,8 +204,6 @@ void NGLScene::timerEvent(QTimerEvent *_event)
 
 void NGLScene::setSpread(double _value)
 {
-    m_emitter->setSpread(static_cast<float>(_value));
-        //update();
 }
 
 

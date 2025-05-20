@@ -1,43 +1,40 @@
+/**
+* Manages terrain mesh generation and rendering
+ * Handles the creation, modification, and rendering of a 3D terrain mesh.
+ * Uses the Strategy pattern for terrain generation and delegates erosion to HydraulicErosion.
+ */
+
+
 #include "Plane.h"
 #include <iostream>
 #include <ngl/Random.h>
-#include <algorithm>
-#include <fstream>
 #include <cmath>
 #include <QOpenGLFunctions>
 #include <ngl/VAOPrimitives.h>
 #include <ngl/Mat4.h>
 #include <ngl/ShaderLib.h>
-#include <ngl/Transformation.h>
-#include <ngl/Util.h>
 #include <ngl/VAOFactory.h>
 #include "PerlinNoise.hpp"
 #include <random>
 #include <ngl/Vec2.h>
-#include "DropletVisualize.h"
 #include "PerlinNoiseGenerator.h"
-
-static bool s_isFirstGeneration = true;
-bool outDebugStatements = false;
 
 Plane::Plane(unsigned int _width, unsigned int _depth, float _spacing)
     : m_width(_width), m_depth(_depth), m_spacing(_spacing)
 {
-    // Create a default terrain generator (PerlinNoiseGenerator)
+    // Initialize with default Perlin noise terrain generator
     m_terrainGenerator = std::make_shared<PerlinNoiseGenerator>(3.0f, 6, 90);
     generate();
 }
 
 void Plane::clearTerrainData()
 {
-    //std::cout << "Plane::clearTerrainData() called." << std::endl;
     m_vertices.clear();
     m_heightGrid.clear();
 }
 
 void Plane::createBaseGridVertices()
 {
-    //std::cout << "Plane::createBaseGridVertices() called." << std::endl;
     m_heightGrid.reserve(m_width * m_depth); // Reserve space for all unique vertices
 
     for (unsigned int z = 0; z < m_depth; ++z)
@@ -50,38 +47,8 @@ void Plane::createBaseGridVertices()
             m_heightGrid.emplace_back(current_x_pos, 0.0f, current_z_pos);
         }
     }
-    //std::cout << "Plane::createBaseGridVertices() - generated " << m_heightGrid.size() << " base vertices." << std::endl;
 }
 
-void Plane::applyPerlinNoiseToGrid()
-{
-    //std::cout << "Plane::applyPerlinNoiseToGrid() called for member m_heightGrid." << std::endl;
-    if (this->m_heightGrid.empty())
-    {
-        std::cerr << "Error: m_heightGrid is empty in applyPerlinNoiseToGrid(). Cannot apply noise." << std::endl;
-        return;
-    }
-
-    const siv::PerlinNoise::seed_type seed = 123456u;
-    const siv::PerlinNoise perlin{seed};
-    float planeTotalWidth = (m_width > 1) ? (m_width - 1) * m_spacing : 1.0f;
-    float planeTotalDepth = (m_depth > 1) ? (m_depth - 1) * m_spacing : 1.0f;
-    if (planeTotalWidth == 0.0f) planeTotalWidth = 1.0f;
-    if (planeTotalDepth == 0.0f) planeTotalDepth = 1.0f;
-
-    for (ngl::Vec3& vertex : this->m_heightGrid) // Iterate by reference to modify Y values
-    {
-        float current_x_pos = vertex.m_x;
-        float current_z_pos = vertex.m_z;
-        float noiseInputX = (m_width == 1) ? 0.0f : current_x_pos / planeTotalWidth;
-        float noiseInputZ = (m_depth == 1) ? 0.0f : current_z_pos / planeTotalDepth;
-        float height_normalized = std::abs(perlin.octave2D_01(noiseInputX * m_noiseFrequency,
-                                                     noiseInputZ * m_noiseFrequency,
-                                                                     m_noiseOctaves, 0.5));
-        vertex.m_y = height_normalized * m_maxHeight;
-    }
-    //std::cout << "Plane::applyPerlinNoiseToGrid() - applied noise to " << this->m_heightGrid.size() << " vertices in member m_heightGrid." << std::endl;
-}
 
 
 void Plane::applyHydraulicErosion(int numDroplets, int dropletMaxLifetime) {
@@ -98,8 +65,6 @@ void Plane::applyHydraulicErosion(int numDroplets, int dropletMaxLifetime) {
 
 void Plane::buildTriangleMeshFromGrid(const std::vector<ngl::Vec3>& noisyGridVertices)
 {
-    //std::cout << "Plane::buildTriangleMeshFromGrid() called." << std::endl;
-
     // Ensure m_vertices is clear before populating.
     m_vertices.clear();
 
@@ -108,7 +73,8 @@ void Plane::buildTriangleMeshFromGrid(const std::vector<ngl::Vec3>& noisyGridVer
         return;
     }
 
-    // Reserve space: each quad becomes 2 triangles, each triangle has 3 vertices.
+    // Each grid cell becomes two triangles
+    // Reserve space: (width-1) * (depth-1) * 2 triangles * 3 vertices per triangle
     m_vertices.reserve((m_width - 1) * (m_depth - 1) * 6);
 
     for (unsigned int z = 0; z < m_depth - 1; ++z)
@@ -132,13 +98,10 @@ void Plane::buildTriangleMeshFromGrid(const std::vector<ngl::Vec3>& noisyGridVer
             m_vertices.push_back(noisyGridVertices[bottomRight]);
         }
     }
-    //std::cout << "Plane::buildTriangleMeshFromGrid() - populated m_vertices with " << m_vertices.size() << " vertices for rendering." << std::endl;
 }
 
 void Plane::setupTerrainVAO()
 {
-    //std::cout << "Plane::setupTerrainVAO() called." << std::endl;
-
     // Always reset the VAO if it exists to free old GPU resources before creating/re-populating.
     if (m_vao)
     {
@@ -148,14 +111,12 @@ void Plane::setupTerrainVAO()
     if (m_vertices.empty())
     {
         std::cerr << "Plane::setupTerrainVAO() - m_vertices is empty. Creating an empty VAO." << std::endl;
-        // Create a new, empty VAO to avoid issues with an uninitialized or stale m_vao.
-        // This ensures render() can safely check m_vao->numIndices() == 0.
         m_vao = ngl::vaoFactoryCast<ngl::MultiBufferVAO>(
             ngl::VAOFactory::createVAO(ngl::multiBufferVAO, GL_TRIANGLES));
         m_vao->bind();
         m_vao->setNumIndices(0); // Set to 0 indices if no data
         m_vao->unbind();
-        return; // Exit if no vertices to upload
+        return;
     }
 
     m_vao = ngl::vaoFactoryCast<ngl::MultiBufferVAO>(
@@ -171,10 +132,7 @@ void Plane::setupTerrainVAO()
 
     m_vao->unbind();
 
-    //std::cout << "Plane::setupTerrainVAO() - VAO configured with " << m_vertices.size() << " vertices." << std::endl;
 }
-
-
 
 
 void Plane::generate()
@@ -190,13 +148,12 @@ void Plane::generate()
 
     setupTerrainVAO();
 
-    //std::cout << "Plane::generate() - completed. Final m_vertices size for VAO: " << m_vertices.size() << std::endl;
+    std::cout << "Plane::generate() - completed. Final m_vertices size for VAO: " << m_vertices.size() << std::endl;
 
 }
 
 void Plane::regenerate()
 {
-    //std::cout << "Plane::regenerate() called. Frequency: " << m_noiseFrequency << ", Octaves: " << m_noiseOctaves << std::endl;
     generate(); // Re-run the generation logic
 }
 
@@ -208,7 +165,6 @@ setupTerrainVAO();
 
 void Plane::render() const
 {
-  //  auto *gl = QOpenGLContext::currentContext()->functions();
     if (!m_vao || m_vao->numIndices() == 0) { // Add a check to prevent drawing an invalid/empty VAO
         return;
     }

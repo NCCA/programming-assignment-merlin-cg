@@ -1,4 +1,6 @@
-//THIS USES A HEADER LIBRARY https://github.com/Reputeless/PerlinNoise
+/*
+ *Uses the header library: https://github.com/Reputeless/PerlinNoise
+ */
 
 
 #include "PerlinNoiseGenerator.h"

@@ -19,13 +19,14 @@ void HydraulicErosion::erode(std::vector<ngl::Vec3>& heightGrid,
 
     if (heightGrid.empty()) { return; }
 
+    // Initialize brush indices for erosion radius
     computeAreaOfInfluence(width, depth, m_erosionRadius);
    // m_dropletTrailPoints.clear();
 
+        // For each droplet simulation
         for (int i = 0; i < numDroplets; ++i)
         {
-            // Initialize Droplet (as per previous snippets)
-            // ... (startX, startZ, create droplet instance)
+            // Initialize Droplet to random pos
             int randGridX = ngl::Random::randomPositiveNumber(width - 1);
             int randGridZ = ngl::Random::randomPositiveNumber(depth - 1);
 
@@ -33,25 +34,34 @@ void HydraulicErosion::erode(std::vector<ngl::Vec3>& heightGrid,
             float startZ = static_cast<float>(randGridZ) * spacing;
             Droplet droplet(ngl::Vec2(startX, startZ), m_initialSpeed, m_initialWaterAmount, dropletMaxLifetime);
 
+            // Simulate droplet movement and erosion
             for (int step = 0; step < dropletMaxLifetime; ++step)
             {
+                // Calculate height and gradient
                 HeightAndGradientData hgDataOld = getHeightAndGradient(heightGrid, width, depth, spacing, droplet.pos.m_x, droplet.pos.m_y);
+                // "Before" height
                 float originalTerrainHeight = hgDataOld.height;
 
+                // Update droplet direction based on the gradient
+                // Direction is influenced by inertia and terrain gradient
                 droplet.dir.m_x = (droplet.dir.m_x * m_inertiaFactor - hgDataOld.rawGradientAscent.m_x * (1 - m_inertiaFactor));
                 droplet.dir.m_y = (droplet.dir.m_y * m_inertiaFactor - hgDataOld.rawGradientAscent.m_y * (1 - m_inertiaFactor));
 
+                // Normalize direction vector
                 float length = std::sqrt((droplet.dir.m_x * droplet.dir.m_x) + (droplet.dir.m_y * droplet.dir.m_y));
                 if (length != 0) {
                     droplet.dir.m_x /= length;
                     droplet.dir.m_y /= length;
                 }
 
+                // Move droplet pos
                 droplet.pos.m_x += droplet.dir.m_x;
                 droplet.pos.m_y += droplet.dir.m_y;
 
+                // Add to trailpoint vector for visualisation
                 m_dropletTrailPoints.push_back(ngl::Vec4(droplet.pos.m_x, originalTerrainHeight, droplet.pos.m_y, static_cast<float>(droplet.lifetime)));
 
+                // Check termination conditions
                 droplet.lifetime--;
                 if (droplet.lifetime <= 0 || droplet.water <= 0.1f ) {
                     break; // End this droplet's simulation
@@ -65,16 +75,14 @@ void HydraulicErosion::erode(std::vector<ngl::Vec3>& heightGrid,
 
                 float newHeight = getHeightAndGradient(heightGrid, width, depth, spacing, droplet.pos.m_x, droplet.pos.m_y).height;
                 float deltaHeight = newHeight - originalTerrainHeight;
-                //std::cout << "S[" << step << "] NewHeight: " << newHeight << ", DeltaH: " << deltaHeight << std::endl;
 
+                // Calculate sediment capacity based on slope, speed and water volume
                 float sedimentCapacity = std::max(-deltaHeight * droplet.speed * droplet.water * m_sedimentCapacityFactor, m_minSedimentCapacity);
-                //std::cout << "S[" << step << "] SedimentCapacity: " << sedimentCapacity << " (MinCapacity: " << m_minSedimentCapacity << ")" << std::endl;
 
                 // If carrying more sediment than capacity, deposit sediment
                 if (droplet.sediment > sedimentCapacity || deltaHeight > 0)
                 {
-                    //std::cout << "S[" << step << "] *** DEPOSITION TRIGGERED ***" << std::endl;
-                    //std::cout << "S[" << step << "] DEPO: DropletSediment_Before: " << droplet.sediment << ", SedimentCapacity: " << sedimentCapacity << std::endl;
+                    // Calculate deposit amount based on height difference or sediment excess
                     float calculated_deposit_amount = 0.0f;
                     if (deltaHeight > 0) {
                         // Original:
@@ -87,25 +95,23 @@ void HydraulicErosion::erode(std::vector<ngl::Vec3>& heightGrid,
 
                     float amountToDeposit = std::max(0.0f, calculated_deposit_amount);
                     amountToDeposit = std::min(amountToDeposit, droplet.sediment);
-                    //std::cout << "S[" << step << "] DEPO: CalculatedAmount: " << calculated_deposit_amount << ", FinalAmountToDeposit: " << amountToDeposit << std::endl;
 
                     droplet.sediment -= amountToDeposit;
+
+                    // Convert world pos to grid coord
                     float gridFloatX = droplet.pos.m_x / spacing;
-                    float gridFloatZ = droplet.pos.m_y / spacing; // Assuming droplet.pos.m_y is world Z
+                    float gridFloatZ = droplet.pos.m_y / spacing;
 
                     int nodeX = static_cast<int>(gridFloatX);
                     int nodeZ = static_cast<int>(gridFloatZ);
 
                     float cellOffsetX = gridFloatX - nodeX;
                     float cellOffsetZ = gridFloatZ - nodeZ;
-                    //std::cout << "Deposition: gridFloatX=" << gridFloatX << ", gridFloatZ=" << gridFloatZ
-                    //<< ", nodeX=" << nodeX << ", nodeZ=" << nodeZ
-                    //<< ", cellOffsetX=" << cellOffsetX << ", cellOffsetZ=" << cellOffsetZ << std::endl;
-                    //std::cout << "amountToDeposit: " << amountToDeposit << std::endl;
+
 
                     if (nodeX >= 0 && nodeX < width - 1 && nodeZ >= 0 && nodeZ < depth - 1)
                     {
-
+                        // Distribute sediment to surrounding grid points using bilinear interpolation
                         int indexNW = nodeZ * width + nodeX;
                         int indexNE = indexNW + 1;
                         int indexSW = indexNW + width;
@@ -123,15 +129,13 @@ void HydraulicErosion::erode(std::vector<ngl::Vec3>& heightGrid,
 
                     }
 
-                    //std::cout << "S[" << step << "] DEPO: DropletSediment_After: " << droplet.sediment << std::endl;
 
                 }
                 else
                 {
-                    //std::cout << "S[" << step << "] *** EROSION TRIGGERED/Attempted ***" << std::endl;
+                    // Calulcate erosion amount based on sediment capacity deficit
                     float amountToErode = std::min((sedimentCapacity - droplet.sediment) * m_erosionRate, -deltaHeight);
-                    //std::cout << "S[" << step << "] ERO: InitialAmountToErode: " << amountToErode << std::endl;
-                    //std::cout << "S[" << step << "] ERO: DropletSediment_BeforeErosionLoop: " << droplet.sediment << std::endl;
+                    // Get current cell coord
                     int currentCellGridX = static_cast<int>(droplet.pos.m_x / spacing);
                     int currentCellGridZ = static_cast<int>(droplet.pos.m_y / spacing); // Assuming droplet.pos.m_y is world Z
                     // Clamp to valid grid range
@@ -139,7 +143,9 @@ void HydraulicErosion::erode(std::vector<ngl::Vec3>& heightGrid,
                     currentCellGridZ = std::max(0, std::min(currentCellGridZ, (int)depth - 1));
                     int brushAccessIndex = currentCellGridZ * width + currentCellGridX;
 
-                    if (brushAccessIndex >= 0 && brushAccessIndex <= m_brushIndices.size()) { // Check bounds
+                    if (brushAccessIndex >= 0 && brushAccessIndex <= m_brushIndices.size())
+                        { // Check bounds
+                        //Apply erosion to all points within brush radius using precaculated weights
                         const std::vector<int>& indices = m_brushIndices[brushAccessIndex];
                         const std::vector<float>& weights = m_brushWeights[brushAccessIndex];
                         for (size_t i = 0; i < indices.size(); i++) {
@@ -151,22 +157,18 @@ void HydraulicErosion::erode(std::vector<ngl::Vec3>& heightGrid,
                             float actualErosion = std::min(heightGrid[nodeIndex].m_y, erosion);
                             heightGrid[nodeIndex].m_y -= actualErosion;
                             droplet.sediment += actualErosion;
-
-                            // std::cout << "Eroded " << actualErosion << " from node at index " << nodeIndex
-                            //           << " (X: " << m_heightGrid[nodeIndex].m_x
-                            //           << ", Z: " << m_heightGrid[nodeIndex].m_z << ")\n";
                         }
                     } else {
                         // Handle case where brushAccessIndex is out of bounds, though clamping should prevent this
                         //std::cout << "Error: Brush access index out of bounds!" << std::endl;
                         continue; // Skip erosion for this step if brush can't be found
                     }
-                    //std::cout << "S[" << step << "] ERO: DropletSediment_AfterErosionLoop: " << droplet.sediment << std::endl; // Print this after the brush loop finishes
                 }
 
+                // Update droplet speed based on height difference and apply evaporation to reduce pits over time
                 droplet.speed = std::sqrt(std::max(0.0f, droplet.speed * droplet.speed + (-deltaHeight) * m_gravity));
                 droplet.water *= (1.0f - m_evaporationRate);
-                // //update droplet's speed
+                // // Update droplet's speed
                 // //std::cout << "S[" << step << "] EndStepSpeed: " << droplet.speed << ", EndStepWater: " << droplet.water << std::endl;
                 // //std::cout << "S[" << step << "] --- End of Step ---" << std::endl << std::endl;
             }
@@ -183,6 +185,7 @@ HeightAndGradientData HydraulicErosion::getHeightAndGradient(
     // Implementation moved from Plane::getHeightAndGradient
     HeightAndGradientData result;
 
+    // Convert world coord to grid
     float gridFloatZ = worldZ / spacing;
     float gridFloatX = worldX / spacing;
 
@@ -226,7 +229,6 @@ HeightAndGradientData HydraulicErosion::getHeightAndGradient(
 
 
 void HydraulicErosion::computeAreaOfInfluence(unsigned int width, unsigned int depth, float radius) {
-    // Implementation moved from Plane::computeAreaOfInfluence
     int centerX = width / 2;
     int centerY = depth / 2;
 
@@ -239,7 +241,7 @@ void HydraulicErosion::computeAreaOfInfluence(unsigned int width, unsigned int d
 
     float weightSum = 0.0f;
 
-    // Relative circle pattern
+    // Create circular brush pattern with weights decreasing from the center
     for (int offsetY = -radius; offsetY <= radius; ++offsetY) {
         for (int offsetX = -radius; offsetX <= radius; ++offsetX) {
             float distanceSquared = offsetX * offsetX + offsetY * offsetY;
@@ -271,6 +273,7 @@ void HydraulicErosion::computeAreaOfInfluence(unsigned int width, unsigned int d
             indices.clear();
             weights.clear();
 
+            // Store valid grid indices and their weights for this center point
             for (size_t i = 0; i < relativeX.size(); ++i) {
                 int nx = x + relativeX[i];
                 int ny = y + relativeY[i];
