@@ -48,6 +48,7 @@ I implemented the **Strategy Pattern** for terrain generation, allowing differen
 
 ### Data Structures
 - Height grid: Stored as a 1D vector of 3D vectors for efficient memory access
+- Droplet structure: Models water droplets with position, direction, speed, water content, sediment load, and lifetime properties
 - Brush indices and weights: Pre-computed for erosion radius to optimize performance
 - Droplet trail points: Vector of 4D vectors (x, y, z, lifetime) for visualization
 
