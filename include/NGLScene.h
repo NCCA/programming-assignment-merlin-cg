@@ -107,6 +107,7 @@ private:
     ngl::Vec3 m_modelPos;
     std::unique_ptr<Emitter> m_emitter;
     std::unique_ptr<Plane> m_plane;
+    std::unique_ptr<HydraulicErosion> m_erode;
     bool m_animate = true;
     bool m_wireframeMode = false;
 

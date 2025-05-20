@@ -4,16 +4,9 @@
 #include <vector>
 #include <ngl/Vec3.h>
 #include <memory>
-//#include <ngl/SimpleVAO.h>
 #include <ngl/MultiBufferVAO.h>
-#include <functional>
 #include <ngl/Vec2.h>
 #include "HydraulicErosion.h"
-
-// struct HeightAndGradientData {
-//     float height = 0.0f;
-//     ngl::Vec2 rawGradientAscent{0.0f, 0.0f}; // Gradient components pointing towards steepest ASCENT
-// };
 
 
 class Plane
@@ -23,26 +16,23 @@ public:
     void generate();
     void regenerate();
     void render() const;
+    void refreshGPUAssets();
 
     void setWidth(int width) {m_width = width; }
     int getWidth() const { return m_width; }
     void setDepth(int depth) {m_depth = depth; }
     int getDepth() const { return m_depth; }
-    void applyPerlinNoise(float scale, float amplitude);
     void setNoiseFrequency(float freq) { m_noiseFrequency = freq; }
     float getNoiseFrequency() const { return m_noiseFrequency; }
     void setNoiseOctaves(int oct) { m_noiseOctaves = oct; }
     int getNoiseOctaves() const { return m_noiseOctaves; }
     void setTerrainHeight(int height) { m_maxHeight = height; }
     int getTerrainHeight() const { return m_maxHeight; }
-    void refreshGPUAssets();
-
-
 
     //Erosion
     void applyHydraulicErosion(int numDroplets, int dropletMaxLifetime /*, other params */);
-    const std::vector<ngl::Vec4>& getDropletTrailPoints() const { return m_dropletTrailPoints; }
-
+    const std::vector<ngl::Vec4>& getDropletTrailPoints() const { return m_erosion.getDropletTrailPoints(); }
+    //const HydraulicErosion& getErosion() const { return m_erosion; }
 private:
     // Helper methods for generation
     void clearTerrainData();
@@ -50,9 +40,7 @@ private:
     void applyPerlinNoiseToGrid();
     void buildTriangleMeshFromGrid(const std::vector<ngl::Vec3>& noisyGridVertices);
     void setupTerrainVAO();
-    void smoothTerrain(float);
     void computeAreaOfInfluence(float radius);
-    void updateDropVisualisation(bool toggle);
     unsigned int m_width;
     unsigned int m_depth;
     std::vector<ngl::Vec3> m_verticesRaw; // grid vertices

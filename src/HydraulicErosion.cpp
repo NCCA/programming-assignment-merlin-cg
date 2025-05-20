@@ -20,7 +20,7 @@ void HydraulicErosion::erode(std::vector<ngl::Vec3>& heightGrid,
     if (heightGrid.empty()) { return; }
 
     computeAreaOfInfluence(width, depth, m_erosionRadius);
-    m_dropletTrailPoints.clear();
+   // m_dropletTrailPoints.clear();
 
         for (int i = 0; i < numDroplets; ++i)
         {

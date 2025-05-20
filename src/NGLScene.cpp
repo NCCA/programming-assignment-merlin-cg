@@ -142,7 +142,6 @@ void NGLScene::keyPressEvent(QKeyEvent *_event)
             {
                 // Apply erosion for just dropletsPerUpdate droplets
                 m_plane->applyHydraulicErosion(dropletsPerUpdate, 30);
-
                 makeCurrent();
                 m_plane->refreshGPUAssets();
 
