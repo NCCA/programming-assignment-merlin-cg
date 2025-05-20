@@ -227,6 +227,22 @@ cmake ..
 make
 ```
 
+## 10. Future Improvements
+- Heightmap Image Export
+- GPU acceleration for erosion simulation using compute shaders
+- Additional terrain generation algorithms (Diamond-Square, Voronoi)
+- Texture mapping based on slope and height
+- Vegetation simulation based on terrain features
+- Water flow map generation
+
+## 11. References and Bibliography
 
 
+- Perlin, K., 1985. An image synthesizer. SIGGRAPH Computer Graphics, 19(3), pp.287–296.
+- Musgrave, F.K., Kolb, C.E. and Mace, R.S., 1989. The synthesis and rendering of eroded fractal terrains. ACM SIGGRAPH Computer Graphics, 23(3), pp.41–50.
+- Mei, X., Decaudin, P. and Hu, B., 2007. Fast hydraulic erosion simulation and visualization on GPU. In: Pacific Graphics 2007. Pacific Graphics, pp.47–56.
+- [Sebastian Lague - Hydraulic Erosion](https://www.youtube.com/watch?v=eaXk97ujbPQ)
+- [Redblobgames - Noise-based Map Generation](https://www.redblobgames.com/maps/terrain-from-noise/)
+- [PerlinNoise Header Library](https://github.com/Reputeless/PerlinNoise)
+- [NGL Graphics Library](http://nccastaff.bournemouth.ac.uk/jmacey/GraphicsLib/index.html)
 
