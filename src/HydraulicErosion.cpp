@@ -22,8 +22,6 @@ void HydraulicErosion::erode(std::vector<ngl::Vec3>& heightGrid,
     computeAreaOfInfluence(width, depth, m_erosionRadius);
     m_dropletTrailPoints.clear();
 
-    for (int i = 0; i < numDroplets; ++i)
-    {
         for (int i = 0; i < numDroplets; ++i)
         {
             // Initialize Droplet (as per previous snippets)
@@ -173,7 +171,6 @@ void HydraulicErosion::erode(std::vector<ngl::Vec3>& heightGrid,
                 // //std::cout << "S[" << step << "] --- End of Step ---" << std::endl << std::endl;
             }
         }
-    }
 }
 
 HeightAndGradientData HydraulicErosion::getHeightAndGradient(
