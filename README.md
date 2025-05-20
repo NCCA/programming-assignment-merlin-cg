@@ -1,7 +1,7 @@
 # Tom Bates CFGAA Assignment
 
 # Qt OpenGL terrain erosion (chosen idea)
-
+# CURRENTLY REFACTORING.. FOR WORKING EROSION GO TO Commit aadcdd8
 ## Idea
 My idea of erosion came when trying to improve realism on terrain generation, terrain generation can be used for many cases such as games, cinematic landscapes or virtual production. In past experience I had already played around with modifying perlin noise with methods such as [FBM](https://www.redblobgames.com/maps/terrain-from-noise/) which involves layering multiple octaves of noise. To enhance mountainous features, I applied the absolute value to each noise layer to sharpen ridges, then inverted the low-frequency, high-amplitude layers to simulate natural erosion and uplift. 
 
