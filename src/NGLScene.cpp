@@ -7,6 +7,7 @@
 #include <ngl/Transformation.h>
 #include <ngl/Util.h>
 #include <iostream>
+#include <QApplication>
 #include <QCoreApplication> // For QCoreApplication::processEvents()
 #include <ngl/VAOFactory.h>
 
@@ -133,10 +134,22 @@ void NGLScene::keyPressEvent(QKeyEvent *_event)
         if (m_plane)
         {
 
-            makeCurrent();
-            m_plane->applyHydraulicErosion(20000, 30);
-            makeCurrent();
-                m_plane->refreshGPUAssets(); // Tell the plane to update its VAO with the final terrain data
+            const int totalDroplets = 40000;
+            const int dropletsPerUpdate = 1000;
+            const int iterations = totalDroplets / dropletsPerUpdate; // 40 iterations
+
+            for (int i = 0; i < iterations; i++)
+            {
+                // Apply erosion for just dropletsPerUpdate droplets
+                m_plane->applyHydraulicErosion(dropletsPerUpdate, 30);
+
+                makeCurrent();
+                m_plane->refreshGPUAssets();
+
+                update();
+                QApplication::processEvents();
+
+            }
             doneCurrent(); // Release context for the FINAL GPU update
 
         }
