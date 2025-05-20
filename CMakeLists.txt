@@ -24,6 +24,7 @@ target_sources(${TargetName} PRIVATE
         src/NGLScene.cpp
         src/NGLSceneMouseControls.cpp
         src/HydraulicErosion.cpp
+        src/PerlinNoiseGenerator.cpp
         include/Emitter.h
         include/MainWindow.h
         include/NGLScene.h
@@ -32,6 +33,8 @@ target_sources(${TargetName} PRIVATE
         include/PerlinNoise.hpp
         include/Plane.h
         include/HydraulicErosion.h
+        include/TerrainGenerator.h
+        include/PerlinNoiseGenerator.h
         ui/MainWindow.ui
         shaders/ParticleFragment.glsl
         shaders/ParticleVertex.glsl

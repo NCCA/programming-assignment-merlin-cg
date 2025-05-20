@@ -15,6 +15,7 @@
 #include <random>
 #include <ngl/Vec2.h>
 #include "Emitter.h"
+#include "PerlinNoiseGenerator.h"
 
 static bool s_isFirstGeneration = true;
 bool outDebugStatements = false;
@@ -22,6 +23,8 @@ bool outDebugStatements = false;
 Plane::Plane(unsigned int _width, unsigned int _depth, float _spacing)
     : m_width(_width), m_depth(_depth), m_spacing(_spacing)
 {
+    // Create a default terrain generator (PerlinNoiseGenerator)
+    m_terrainGenerator = std::make_shared<PerlinNoiseGenerator>(3.0f, 6, 90);
     generate();
 }
 
@@ -80,52 +83,7 @@ void Plane::applyPerlinNoiseToGrid()
     //std::cout << "Plane::applyPerlinNoiseToGrid() - applied noise to " << this->m_heightGrid.size() << " vertices in member m_heightGrid." << std::endl;
 }
 
-// HeightAndGradientData Plane::getHeightAndGradient(float worldX, float worldZ) const
-// {
-//     HeightAndGradientData result;
-//
-//     float gridFloatX = worldX / m_spacing;
-//     float gridFloatZ = worldZ / m_spacing;
-//
-//     int coordX = static_cast<int>(std::floor(gridFloatX));
-//     int coordZ = static_cast<int>(std::floor(gridFloatZ));
-//
-//     // Calculate droplet's offset inside the cell (0,0) = at NW node, (1,1) = at SE node
-//     float offsetX = gridFloatX - coordX;
-//     float offsetZ = gridFloatZ - coordZ;
-//
-//     // Define and clamp coordinates for the four cell corners
-//     int x0 = coordX;
-//     int z0 = coordZ;
-//     int x1 = coordX + 1;
-//     int z1 = coordZ + 1;
-//     int c_x0 = std::clamp(x0, 0, static_cast<int>(m_width) - 1);
-//     int c_z0 = std::clamp(z0, 0, static_cast<int>(m_depth) - 1);
-//     int c_x1 = std::clamp(x1, 0, static_cast<int>(m_width) - 1);
-//     int c_z1 = std::clamp(z1, 0, static_cast<int>(m_depth) - 1);
-//
-//     // Calculate heights of the four nodes of the droplet's cell
-//     // index = z * m_width + x
-//     float hNW = m_heightGrid[c_z0 * m_width + c_x0].m_y;
-//     float hNE = m_heightGrid[c_z0 * m_width + c_x1].m_y;
-//     float hSW = m_heightGrid[c_z1 * m_width + c_x0].m_y;
-//     float hSE = m_heightGrid[c_z1 * m_width + c_x1].m_y;
-//
-//     // Calculate droplet's direction of flow (gradient) with bilinear interpolation of height difference along the edges
-//     // This is the gradient of ascent
-//     result.rawGradientAscent.m_x = (hNE - hNW) * (1.0f - offsetZ) + (hSE - hSW) * offsetZ;
-//     result.rawGradientAscent.m_y = (hSW - hNW) * (1.0f - offsetX) + (hSE - hNE) * offsetX; // m_y for Z-gradient
-//
-//     // Calculate height with bilinear interpolation of the heights of the nodes of the cell
-//     float height_lerp_bottom = hNW * (1.0f - offsetX) + hNE * offsetX;
-//     float height_lerp_top    = hSW * (1.0f - offsetX) + hSE * offsetX;
-//     result.height = height_lerp_bottom * (1.0f - offsetZ) + height_lerp_top * offsetZ;
-//
-//     return result;
-//
-// }
 
-// Inspired by Sebastian Lague's hydraulic erosion implementation
 void Plane::applyHydraulicErosion(int numDroplets, int dropletMaxLifetime) {
     // Delegate to the erosion object
     m_erosion.erode(m_heightGrid, m_width, m_depth, m_spacing, numDroplets, dropletMaxLifetime);
@@ -133,89 +91,6 @@ void Plane::applyHydraulicErosion(int numDroplets, int dropletMaxLifetime) {
     // Update the mesh after erosion
     refreshGPUAssets();
 }
-
-void Plane::computeAreaOfInfluence(float radius)
-{
-    int centerX = m_width / 2;
-    int centerY = m_depth / 2;
-
-    m_brushIndices.resize(m_width * m_depth);
-    m_brushWeights.resize(m_width * m_depth);
-
-    std::vector<int> relativeX;
-    std::vector<int> relativeY;
-    std::vector<float> unnormalizedWeights;
-
-    float weightSum = 0.0f;
-
-    // Relative circle pattern
-    for (int offsetY = -radius; offsetY <= radius; ++offsetY) {
-        for (int offsetX = -radius; offsetX <= radius; ++offsetX) {
-            float distanceSquared = offsetX * offsetX + offsetY * offsetY;
-
-            if (distanceSquared < radius * radius) {
-                float distance = std::sqrt(distanceSquared);
-                float weight = 1.0f - (distance / radius); // stronger near center
-
-                relativeX.push_back(offsetX);
-                relativeY.push_back(offsetY);
-                unnormalizedWeights.push_back(weight);
-                weightSum += weight;
-            }
-        }
-    }
-
-    // Normalize weights
-    for (float& weight : unnormalizedWeights) {
-        weight /= weightSum;
-    }
-
-    // Apply that pattern to each cell on the grid
-    for (int y = 0; y < m_depth; ++y) {
-        for (int x = 0; x < m_width; ++x) {
-            int centerIndex = y * m_width + x;
-
-            std::vector<int>& indices = m_brushIndices[centerIndex];
-            std::vector<float>& weights = m_brushWeights[centerIndex];
-            indices.clear();
-            weights.clear();
-
-            for (size_t i = 0; i < relativeX.size(); ++i) {
-                int nx = x + relativeX[i];
-                int ny = y + relativeY[i];
-
-                if (nx >= 0 && nx < m_width && ny >= 0 && ny < m_depth) {
-                    int index = ny * m_width + nx;
-                    indices.push_back(index);
-                    weights.push_back(unnormalizedWeights[i]);
-                }
-            }
-        }
-    }
-}
-
-//Sebastian Lague's Erosion outline:
-    // Erode(map)
-    // {
-    //     // Create water droplet at random point on the map
-    //     for(lifetime 1; lifetime 30; liftime ++)
-    //         // Calculate droplets height and the direction of flow with bilinear interpolation of surrounding heights
-
-    //         // Update the droplets position (move 1 unit regardless of speed so as not to skip over sections of the map)
-
-    //         // Find the droplet's new height and calculate the deltaHeight
-
-    //         // Calculate the droplet's sediment capacity based on its speed and how much water is in the droplet (higher when moving fast down a slope and contains lots of water)
-
-    //         // If calculating more sediment than capacity, or if flowing up a slope (due to its inertia)
-    //         // Deposit a fraction of the sediment to the surrounding nodes (with bilinear interpolation)
-
-    //         // Otherwise erode a fraction of the droplets remaining capacity from the soil, distributed over the radius of the droplet.
-    //         // Note: don't erode more than deltaHeight to avoid digging holes behind the droplet and creating sikes
-
-    //         // Update droplet's speed based on deltaHeight
-    //         // Evaporate a fraction of the droplet's water
-
 
 
 
@@ -308,11 +183,8 @@ void Plane::generate()
     clearTerrainData();
 
     createBaseGridVertices();
-    m_dropletTrailPoints.clear();
-    applyPerlinNoiseToGrid();
-
-
-    //applyHydraulicErosion(1,30);
+    m_erosion.clearDropletTrailPoints();
+    m_terrainGenerator->generateTerrain(m_heightGrid, m_width, m_depth, m_spacing, m_maxHeight);
 
     buildTriangleMeshFromGrid(m_heightGrid);
 

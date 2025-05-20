@@ -1,7 +1,30 @@
 //
 // Created by s5609424 on 20/05/25.
 //
-//currently having an issue
+
+
+//Sebastian Lague's Erosion outline:
+    // Erode(map)
+    // {
+    //     // Create water droplet at random point on the map
+    //     for(lifetime 1; lifetime 30; liftime ++)
+    //         // Calculate droplets height and the direction of flow with bilinear interpolation of surrounding heights
+
+    //         // Update the droplets position (move 1 unit regardless of speed so as not to skip over sections of the map)
+
+    //         // Find the droplet's new height and calculate the deltaHeight
+
+    //         // Calculate the droplet's sediment capacity based on its speed and how much water is in the droplet (higher when moving fast down a slope and contains lots of water)
+
+    //         // If calculating more sediment than capacity, or if flowing up a slope (due to its inertia)
+    //         // Deposit a fraction of the sediment to the surrounding nodes (with bilinear interpolation)
+
+    //         // Otherwise erode a fraction of the droplets remaining capacity from the soil, distributed over the radius of the droplet.
+    //         // Note: don't erode more than deltaHeight to avoid digging holes behind the droplet and creating sikes
+
+    //         // Update droplet's speed based on deltaHeight
+    //         // Evaporate a fraction of the droplet's water
+
 #ifndef HYDRAULICEROSION_H
 #define HYDRAULICEROSION_H
 
@@ -39,6 +62,7 @@ public:
     // Access to visualization data
     const std::vector<ngl::Vec4>& getDropletTrailPoints() const { return m_dropletTrailPoints; }
 
+    void clearDropletTrailPoints() { m_dropletTrailPoints.clear(); }
 private:
     // Helper methods
     HeightAndGradientData getHeightAndGradient(const std::vector<ngl::Vec3>& heightGrid,

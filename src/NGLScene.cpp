@@ -95,7 +95,7 @@ void NGLScene::paintGL()
   ngl::ShaderLib::setUniform("Colour",1.0f,1.0f,1.0f,1.0f);
  // ngl::VAOPrimitives::draw("floor");
 
-  ngl::ShaderLib::use(ngl::nglTextShader);
+  //ngl::ShaderLib::use(ngl::nglTextShader);
   // m_text->renderText(10,700,"Particle System");
 
 
