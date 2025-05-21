@@ -1,5 +1,5 @@
 # Tom Bates CFGAA Assignment
-
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Qt OpenGL terrain erosion (chosen idea)
 ## 1. Introduction
 I developed a terrain generator with hydraulic erosion simulation using C++, OpenGL, and Qt. This project demonstrates procedural terrain generation using Perlin noise and realistic terrain erosion through a water droplet simulation algorithm. The application allows real-time adjustment of terrain parameters and visualization of the erosion process.
@@ -28,7 +28,9 @@ The hydraulic erosion process simulates:
 5. Terrain modification based on erosion and deposition
 
 This process creates realistic features like river beds, valleys, and ridges that are difficult to achieve with noise-based generation alone.
+<br>
 
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ## 3. Design and Architecture
 ### Class Structure
 The main classes in the system are:
@@ -51,8 +53,9 @@ I implemented the **Strategy Pattern** for terrain generation, allowing differen
 - Droplet structure: Models water droplets with position, direction, speed, water content, sediment load, and lifetime properties
 - Brush indices and weights: Pre-computed for erosion radius to optimize performance
 - Droplet trail points: Vector of 4D vectors (x, y, z, lifetime) for visualization
+<br>
 
-
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ## 4. Implementation Details
 
 ### 4.1 Terrain Generation
@@ -103,10 +106,10 @@ void main() {
 ```
 
 Droplet trails are visualized using point sprites with color based on the droplet's lifetime.
+<br>
 
-
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ## 5. Object-Oriented Programming Features
-
 ### SOLID Principles Application
 
 Throughout the development of this terrain generator, I've refactored to incorporate aspects of SOLID principles. My project evolved from a monolithic Plane class to a more modular design following SOLID principles. By extracting the HydraulicErosion class and implementing the TerrainGenerator interface with a PerlinNoiseGenerator implementation, I separated responsibilities and improved maintainability. The TerrainGenerator interface demonstrates the Open/Closed Principle by allowing new generation algorithms without modifying existing code. While I've partially implemented Dependency Inversion through abstraction-based dependencies, I recognize opportunities for improvement, such as creating an erosion algorithm interface, further separating rendering functions and reducing the coupling of paramaters. 
@@ -150,9 +153,9 @@ public:
                         int maxHeight) override;
 };
 ```
+<br>
 
-
-
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ## 6. GUI and User Interaction
 The application provides a Qt-based GUI with controls for:
 
@@ -164,7 +167,9 @@ The application provides a Qt-based GUI with controls for:
 Noise & Grid parameter changes are immediately reflected in the terrain, allowing for interactive experimentation.
 
 Keyboard controls can be used for cases such as quick erode(E), toggle wireframe(W) and droplet visualization(V). 
+<br>
 
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ## 7. Progess Screenshots
 
 ### Noise generation
@@ -193,8 +198,9 @@ Visualised the droplet simulation, just need to implement sediment erosion and d
 ![image](https://github.com/user-attachments/assets/2fb6b1c4-df21-4d7a-bfe2-fa17dcf5c523)
 ![image](https://github.com/user-attachments/assets/c88e3eb1-f9b6-4e23-9254-c05388783a32)
 Finally got sediment erosion and deposition after quite a lot of debugging.
+<br>
 
-
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ## 8. Results and Visual Impact
 
 ### Before erosion vs After (40,000)
@@ -205,7 +211,9 @@ Finally got sediment erosion and deposition after quite a lot of debugging.
 
 ### Video Demonstration
 https://youtu.be/Fyr37X3A0ic
+<br>
 
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ## 9. Build instructions
 ### Prerequisites
 - C++17 compatible compiler
@@ -227,7 +235,9 @@ cmake ..
 # Build
 make
 ```
+<br>
 
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ## 10. Future Improvements
 - Heightmap Image Export
 - GPU acceleration for erosion simulation using compute shaders
@@ -235,7 +245,9 @@ make
 - Texture mapping based on slope and height
 - Vegetation simulation based on terrain features
 - Water flow map generation
+<br>
 
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ## 11. References and Bibliography
 
 
