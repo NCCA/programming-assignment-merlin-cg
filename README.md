@@ -211,6 +211,7 @@ Finally got sediment erosion and deposition after quite a lot of debugging.
 
 ### Video Demonstration
 https://youtu.be/Fyr37X3A0ic
+https://youtu.be/IjOlhfDJ07Q (with extra UI controls)
 <br>
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
