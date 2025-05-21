@@ -11,6 +11,7 @@ Key features:
 - Real-time visualization of erosion process
 - Object-oriented design following S.O.L.I.D principles
 <br>
+
 ## 2. Research and Background
 ### Terrain Generation & Idea
 My prior research into terrain erosion (For a Maya Python project last year) led me to explore Perlin noise for realistic terrain generation. While basic Perlin noise creates smooth, rolling hills, I enhanced it by applying techniques such as [Fractal Brownian Motion (FBM)](https://www.redblobgames.com/maps/terrain-from-noise/ ) which involves layering multiple octaves of noise at different frequencies and amplitudes. To create more realistic mountainous features, I applied the absolute value to each noise layer to sharpen ridges, then inverted low-frequency, high-amplitude layers to simulate natural erosion patterns and tectonic uplift. However, I only got so far with this method and was limited by the speed on Python which inspired me to create a new terrain generator in C++ that incorporates realistic Hydraulic Erosion.
