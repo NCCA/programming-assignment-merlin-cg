@@ -209,7 +209,7 @@ Finally got sediment erosion and deposition after quite a lot of debugging.
 ### Comparison to real world example 
 ![image](https://github.com/user-attachments/assets/b0246ae8-8ae2-4b7d-85dd-76f77f2c7d7e)
 
-### Video Demonstration
+### Video Demonstration of program
 - https://youtu.be/Fyr37X3A0ic
 - https://youtu.be/IjOlhfDJ07Q (with extra UI controls)
 <br>
