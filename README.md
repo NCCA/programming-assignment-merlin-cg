@@ -10,7 +10,7 @@ Key features:
 - Realistic hydraulic erosion simulation
 - Interactive parameter controls
 - Real-time visualization of erosion process
-- Object-oriented design following SOLID principles
+- Object-oriented design following S.O.L.I.D principles
 
 ## 2. Research and Background
 
