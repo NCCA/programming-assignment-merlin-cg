@@ -157,7 +157,7 @@ public:
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ## 6. GUI and User Interaction
-The application provides a Qt-based GUI with controls for:
+The application provides a Qt5-based GUI using the [QDarkStyleSheet](https://github.com/ColinDuquesnoy/QDarkStyleSheet) with controls for:
 
 - Terrain dimensions (width, depth)
 - Noise parameters (frequency, octaves, height)
@@ -258,4 +258,5 @@ make
 - [Redblobgames - Noise-based Map Generation](https://www.redblobgames.com/maps/terrain-from-noise/)
 - [PerlinNoise Header Library](https://github.com/Reputeless/PerlinNoise)
 - [NGL Graphics Library](http://nccastaff.bournemouth.ac.uk/jmacey/GraphicsLib/index.html)
+- [QDarkStyleSheet](https://github.com/ColinDuquesnoy/QDarkStyleSheet)
 
